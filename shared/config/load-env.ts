@@ -32,8 +32,10 @@ function validateEnvironment(variables: Variables): Environment {
   }
   return EnvironmentSchema.parse({
     WEB_BASE_URL: variables.WEB_BASE_URL,
+    API_BASE_URL: variables.API_BASE_URL,
     TEST_LOCALE: variables.TEST_LOCALE,
     ALLOW_PRODUCTION_READ_ONLY: variables.ALLOW_PRODUCTION_READ_ONLY,
+    ALLOW_PUBLIC_READ_ONLY_API: variables.ALLOW_PUBLIC_READ_ONLY_API,
     CI: variables.CI,
   });
 }
@@ -42,8 +44,15 @@ export function requireRuntime(
   environment: Environment,
   runtime: Runtime,
 ): void {
-  // Every current target is treated as production/read-only. Changing a URL
-  // cannot enable writes; additional layers need a deliberate implementation.
+  // API and browser runs need separate opt-ins. Both stay read-only.
+  if (runtime === 'api') {
+    if (!environment.allowPublicReadOnlyApi || !environment.apiBaseUrl) {
+      throw new Error(
+        'Public read-only API capability is disabled. It requires API_BASE_URL and ALLOW_PUBLIC_READ_ONLY_API=true.',
+      );
+    }
+    return;
+  }
   if (runtime !== 'e2e') throw new Error(`${runtime} capability is disabled.`);
   if (!environment.allowProductionReadOnly) {
     throw new Error(

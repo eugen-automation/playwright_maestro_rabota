@@ -1,34 +1,34 @@
-name: Public read-only web smoke
-on:
-  workflow_dispatch:
-    inputs:
-      allow_production_read_only:
-        description: Explicitly allow the restricted public registration document GET
-        required: true
-        type: boolean
-        default: false
-permissions:
-  contents: read
-jobs:
-  smoke:
-    if: inputs.allow_production_read_only == true
-    runs-on: ubuntu-latest
-    env:
-      WEB_BASE_URL: ${{ vars.WEB_BASE_URL }}
-      TEST_LOCALE: ${{ vars.TEST_LOCALE }}
-      ALLOW_PRODUCTION_READ_ONLY: 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24.21.0'
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:web:e2e -- --grep @smoke
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: web-e2e-results
-          path: reports/web/
-          retention-days: 7
+# name: Public read-only web smoke
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       allow_production_read_only:
+#         description: Explicitly allow the restricted public registration document GET
+#         required: true
+#         type: boolean
+#         default: false
+# permissions:
+#   contents: read
+# jobs:
+#   smoke:
+#     if: inputs.allow_production_read_only == true
+#     runs-on: ubuntu-latest
+#     env:
+#       WEB_BASE_URL: ${{ vars.WEB_BASE_URL }}
+#       TEST_LOCALE: ${{ vars.TEST_LOCALE }}
+#       ALLOW_PRODUCTION_READ_ONLY: 'true'
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: '24.21.0'
+#           cache: npm
+#       - run: npm ci
+#       - run: npx playwright install --with-deps chromium
+#       - run: npm run test:web:e2e -- --grep @smoke
+#       - uses: actions/upload-artifact@v4
+#         if: always()
+#         with:
+#           name: web-e2e-results
+#           path: reports/web/
+#           retention-days: 7

@@ -7,6 +7,19 @@ const valid = {
 export const CONFIGURATION_CASES = {
   valid,
   optedIn: { ...valid, ALLOW_PRODUCTION_READ_ONLY: 'true' },
+  apiConfigured: { ...valid, API_BASE_URL: valid.WEB_BASE_URL },
+  apiOptedIn: {
+    ...valid,
+    API_BASE_URL: valid.WEB_BASE_URL,
+    ALLOW_PUBLIC_READ_ONLY_API: 'true',
+  },
+  apiOptedInWithoutUrl: { ...valid, ALLOW_PUBLIC_READ_ONLY_API: 'true' },
+  apiWrongOrigin: {
+    ...valid,
+    API_BASE_URL: 'https://unverified.example',
+    ALLOW_PUBLIC_READ_ONLY_API: 'true',
+  },
+  invalidApiOptIn: { ...valid, ALLOW_PUBLIC_READ_ONLY_API: 'yes' },
   invalidUrl: { ...valid, WEB_BASE_URL: 'invalid-url' },
   credentialUrl: {
     ...valid,

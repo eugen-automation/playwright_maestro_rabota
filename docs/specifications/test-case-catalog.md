@@ -1,6 +1,6 @@
 # Detailed test-case catalog
 
-Created 2026-11-03. Scope: step 2 of the implementation plan.
+Created 2026-11-03. Updated to the API-first testing-pyramid strategy on 2026-11-03.
 
 Sources: [test plan](../TEST_PLAN.md), [engineering rules](../../AGENTS.md),
 [registration discovery](registration-discovery.md), and
@@ -12,19 +12,22 @@ the test plan, pending product/discovery confirmation. They are not observations
 of working features. No new application behavior was inspected or executed while
 creating this catalog.
 
-Initial design inventory: **55 case instances** — 27 web (26 proposed UI cases
-and the existing limited E2E case), 8 API, 16 native mobile (8 templates with
-separate Android/iOS records), and 4 synchronization (2 templates with separate
-platform records). Only the existing E2E case has an implementation and a prior
-recorded pass. The other 54 instances remain proposed and unimplemented. These
-counts exclude undetailed backlog and do not measure executed coverage.
+Current inventory: **59 case instances** — 12 API (4 implemented public read-only,
+8 controlled-data candidates), 27 web (26 proposed UI and the existing limited
+E2E), 16 native mobile and 4 cross-platform instances. The original 55 IDs are
+retained; four new public API IDs record the first observed-contract increment.
+Five cases are implemented, but only the original E2E has a prior recorded pass.
+The four new API cases are **not run**; the other 54 remain proposed/unimplemented.
+Tooling tests and undetailed backlog are excluded. Counts are not a target pyramid
+ratio or executed coverage. Keep API first, UI focused and E2E selective; see
+[coverage ownership](testing-pyramid.md) and [API discovery](api-discovery.md).
 
 ## Reading and maintaining cases
 
-- [Web cases](web-cases.md): first UI increment and the existing limited E2E case.
-- [API cases](api-cases.md): initial backend contract and business-rule candidates.
-- [Mobile cases](mobile-cases.md): separate Android/iOS execution records.
-- [Cross-platform cases](cross-platform-cases.md): independently owned synchronization checks.
+- [API cases](api-cases.md): first implementation priority; broaden backend contract and business-rule coverage.
+- [Web cases](web-cases.md): later focused UI candidates and the retained limited E2E baseline.
+- [Mobile cases](mobile-cases.md): selective platform risks with separate Android/iOS records.
+- [Cross-platform cases](cross-platform-cases.md): selective, independently owned integration checks.
 
 A case ID is permanent. Web cases have exactly one intended layer and one suite.
 Priority is business risk, not a test tag. Every detailed case inherits the
@@ -45,9 +48,11 @@ result are separate fields. Defaults for all proposed cases are:
 | Automation execution      | Not run; prerequisite gates unresolved                      |
 | Evidence                  | None; add a dated execution record before claiming a result |
 
-The sole exception is `E2E-WEB-007-01`: implemented with a prior Chromium pass
-recorded in the foundation baseline. It has no recorded manual execution. This
-single markup check does not complete parent group `WEB-007`.
+Exceptions: `E2E-WEB-007-01` is implemented with a prior Chromium pass recorded
+in the foundation baseline. The four `API-PUBLIC-*` cases have observed contracts
+and implementation, with execution deferred. No manual test pass is recorded for
+these cases. The markup check does not complete `WEB-007`, and public API checks
+do not complete controlled search/detail business-rule coverage.
 
 A gate denotes a known prerequisite, not a skipped test or authorization.
 Promote a case to ready only after its gates have dated evidence. Record blocked
@@ -62,7 +67,7 @@ names, selectors, numeric limits, or platform identifiers.
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D — Discovery         | Dated requirements or observed behavior for the selected feature/build: navigation, controls, supported inputs, expected outcomes, locale, and relevant contracts. Resolve each case's open questions.                                                                                                                                                                                       |
 | U — Isolated frontend | Maintained real frontend build/server backed by fixtures, including server-rendered data. Verified synthetic response files and strict shared schemas where JSON is modeled. Fixture interception installed before navigation; unexpected backend activity fails; service workers and observed alternative transports cannot bypass isolation. No real clients, seeders, or backend traffic. |
-| A — Authorized API    | Verified base URL, endpoints, methods, request/response contracts and permissions; shared typed configuration and clients; explicit runtime enablement. The current API runtime remains disabled.                                                                                                                                                                                            |
+| A — Authorized API    | Verified origin, methods/paths, contracts and access scope, shared configuration/clients and separate runtime opt-in. Resolved only for the four observed public read-only cases; broader controlled-data and write cases remain gated.                                                                                                                                                      |
 | W — Controlled writes | Approved non-production target, explicit execution opt-in, disposable account(s), controlled vacancies, unique run/test ownership, validated setup and cleanup limited to owned records. Applies to manual execution too, including authentication, email, saved jobs, and profile changes. A URL override cannot enable writes.                                                             |
 | M — Mobile readiness  | Verified installed build and platform identifier, supported OS/device, Romanian UI hierarchy, deterministic startup/authentication, shared runner and reporting. No reliance on a previously signed-in device.                                                                                                                                                                               |
 | I — iOS readiness     | Suitable macOS simulator runner/build or approved supported physical-device setup, with iOS-specific identifier and hierarchy verified. Windows does not supply an iOS simulator.                                                                                                                                                                                                            |
@@ -180,18 +185,29 @@ requests; setup/cleanup is validated too.
 
 ## Implementation order
 
-1. Resolve D for homepage, matching/empty search, city/combined filters and
-   vacancy details; record observations without modifying live accounts.
-2. Resolve U and implement the linked independent UI smoke cases; expand
-   negative states as regression. Do not replace the real frontend with a
-   handwritten demonstration page.
-3. Resolve registration behavior and U before implementing client validation;
-   preserve the current limited E2E guard.
-4. Resolve A before API implementation; W additionally precedes any real
-   registration, authentication, CV/application or other state-changing execution.
-5. Resolve M per platform, then I for iOS, before native smoke.
-6. Detail the explicit backlog and selected real E2E journeys incrementally;
-   update traceability and statuses from observed results.
+The initial public GET-only increment is implemented and not executed; it covers
+observed autocomplete and VIP identity only. Continue the broader matrix below
+without treating that limited increment as controlled search/detail coverage.
+
+1. Resolve D and A for API search and vacancy details: verify authorized target,
+   contracts, semantics and deterministic data. Missing API access is the first
+   blocker to resolve, not a reason to expand E2E instead.
+2. Implement canonical strict schemas, typed clients and API fixtures, then
+   independent `API-SEARCH-01` and `API-JOBS-01` smoke cases. Expand API filter,
+   validation, unavailable-state, empty, pagination and boundary coverage first.
+3. Broaden API authentication, permission, ownership and persistence matrices.
+   Resolve W before setup mutations or other real state changes; resolve N for
+   notification-dependent work. Prioritize eligible API CI as coverage is delivered.
+4. Resolve D and U for focused frontend rendering/interactions and client
+   validation, reusing verified contracts for file-backed responses. Keep API
+   business-rule matrices out of browser tests. Do not replace the real frontend
+   with a handwritten demonstration page.
+5. Select critical real web E2E and native-specific risks beyond lower-layer
+   proof. Resolve M separately per platform and I for iOS before Maestro work;
+   retain all write/reset guards and the existing limited E2E baseline.
+6. Add only justified cross-platform integration and compatibility checks.
+   Preserve case IDs and update traceability/statuses from observed evidence;
+   implementation order does not create dependencies between executed tests.
 
 This catalog creates no executable tests, target configuration, fixture data, or
 new execution permissions. Coverage percentages must use an agreed detailed-case

@@ -11,7 +11,7 @@
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:foundation": "tsx --test shared/config/load-env.test.ts web/fixtures/pom/read-only-policy.test.ts",
+    "test:foundation": "tsx --test shared/config/load-env.test.ts shared/api/clients/read-only-api-client.test.ts shared/api/clients/public-jobs-contracts.test.ts web/fixtures/pom/read-only-policy.test.ts",
     "test:web:ui": "playwright test --config web/playwright.config.ts --project ui-chromium",
     "test:web:api": "playwright test --config web/playwright.config.ts --project api",
     "test:web:e2e": "playwright test --config web/playwright.config.ts --project e2e-chromium",

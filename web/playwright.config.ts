@@ -30,13 +30,13 @@ export default defineConfig({
     video: 'off',
   },
   projects: [
+    { name: 'api', testMatch: 'api/**/*.spec.ts', metadata: { layer: 'api' } },
     {
       name: 'ui-chromium',
       testMatch: 'ui/**/*.spec.ts',
       use: { ...devices['Desktop Chrome'] },
       metadata: { layer: 'ui' },
     },
-    { name: 'api', testMatch: 'api/**/*.spec.ts', metadata: { layer: 'api' } },
     {
       name: 'e2e-chromium',
       testMatch: 'journeys/**/*.spec.ts',

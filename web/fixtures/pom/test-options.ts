@@ -7,8 +7,13 @@ import { RegistrationPage } from '../../pages/registration-page.js';
 import { ROUTES } from '../../constants/routes.js';
 import { allowsRegistrationDocument } from './read-only-policy.js';
 import { WEB_TEST_SETTINGS } from '../../constants/test-settings.js';
+import { PublicJobsClient } from '../../../shared/api/clients/public-jobs-client.js';
 
-type Fixtures = { registrationPage: RegistrationPage; executionGuard: void };
+type Fixtures = {
+  registrationPage: RegistrationPage;
+  publicJobsApi: PublicJobsClient;
+  executionGuard: void;
+};
 
 export const test = base.extend<Fixtures>({
   executionGuard: [
@@ -19,10 +24,6 @@ export const test = base.extend<Fixtures>({
         throw new Error('Missing or invalid project layer.');
       const environment = readEnvironment();
       requireRuntime(environment, layer);
-      if (layer !== 'e2e')
-        throw new Error(
-          'UI mocks and real API contracts are not implemented; execution is disabled.',
-        );
       const layerTags = testInfo.tags.filter((tag) =>
         ['@ui', '@api', '@e2e'].includes(tag),
       );
@@ -42,8 +43,36 @@ export const test = base.extend<Fixtures>({
     },
     { auto: true },
   ],
-  context: async ({ browser, executionGuard }, use) => {
+  request: async ({ executionGuard }, _use) => {
     void executionGuard;
+    void _use;
+    throw new Error(
+      'Raw requests are unavailable. Use the fixture-owned read-only API client.',
+    );
+  },
+  publicJobsApi: async ({ playwright, executionGuard }, use, testInfo) => {
+    void executionGuard;
+    const environment = readEnvironment();
+    if (testInfo.project.metadata.layer !== 'api' || !environment.apiBaseUrl) {
+      throw new Error(
+        'Public jobs API fixture requires the opted-in API layer.',
+      );
+    }
+    const client = await PublicJobsClient.create(playwright.request, {
+      baseUrl: environment.apiBaseUrl,
+      timeout: WEB_TEST_SETTINGS.timeouts.api,
+    });
+    try {
+      await use(client);
+    } finally {
+      await client.dispose();
+    }
+  },
+  context: async ({ browser, executionGuard }, use, testInfo) => {
+    void executionGuard;
+    if (testInfo.project.metadata.layer !== 'e2e') {
+      throw new Error('Browser contexts are unavailable to this test layer.');
+    }
     const environment = readEnvironment();
     if (!environment.webBaseUrl) throw new Error('Missing verified web URL.');
     // This initial public check reads server-rendered markup only. No scripts,

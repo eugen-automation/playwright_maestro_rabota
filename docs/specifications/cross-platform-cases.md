@@ -4,6 +4,11 @@ Source: [test plan §2.3](../TEST_PLAN.md#23-cross-platform-testing).
 Related detailed work: [web cases](web-cases.md), [API cases](api-cases.md) and
 [mobile cases](mobile-cases.md). [Catalog](test-case-catalog.md) defines gates.
 
+These are selective top-layer checks under the [testing-pyramid strategy](testing-pyramid.md).
+First cover saved-job rules, ownership and persistence through APIs. Add these
+journeys only to establish cross-surface propagation and refresh behavior that
+API and isolated UI tests do not prove; do not repeat the backend rule matrix.
+
 Each template has separate desktop-to-Android and desktop-to-iOS instances.
 Inherited fields: **P1 / regression**, behavior verification **proposed**,
 automation suitability **candidate**, evidence **none**. Both manual and

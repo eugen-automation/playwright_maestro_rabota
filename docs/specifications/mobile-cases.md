@@ -4,6 +4,12 @@ Sources: [test plan §2.2](../TEST_PLAN.md#22-native-mobile--functional-test-sce
 and [Maestro candidates](../TEST_PLAN.md#43-native-mobile-automation--maestro).
 [Catalog](test-case-catalog.md) defines gates, recipes and execution evidence.
 
+These are E2E candidates at the top of the [testing pyramid](testing-pyramid.md),
+after broad API and focused isolated UI coverage. Prioritize native launch,
+navigation, lifecycle and selected critical integrations. Shared backend rule
+matrices belong to API tests; do not implement every API variant on each device.
+Retain the case inventory and select platform cases by distinct risk/readiness.
+
 Each template below defines **two independent cases**, prefixed AND and IOS.
 Their descriptions can be shared, but build support, selectors, setup, execution
 and evidence must be verified separately. No installed package/bundle identifier

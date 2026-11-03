@@ -10,6 +10,13 @@ Each UI case targets the actual isolated frontend with file-backed verified
 responses; its backend remains unreachable during server rendering and all
 browser activity. Proposed outcomes require discovery confirmation.
 
+Under the [testing-pyramid strategy](testing-pyramid.md), these are second-layer
+frontend candidates after API contract/rule coverage. Select checks for rendering,
+interaction, client validation and response-state presentation; leave matching,
+permission, persistence and other backend rule matrices to API tests. Preserve
+all existing case IDs and statuses; this inventory is not a target UI test count.
+The retained markup E2E below does not change API-first implementation priority.
+
 Except for the explicit existing E2E override, each case has behavior
 verification **proposed**, manual execution **not run (gates unresolved)**,
 automation suitability **candidate**, implementation **not implemented**,
