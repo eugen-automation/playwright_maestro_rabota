@@ -97,7 +97,10 @@ uploads web results. Set GitHub repository variables `WEB_BASE_URL` and
 
 Production requests do not run automatically on a PR. Mocked UI PR smoke and
 API/mobile jobs await their prerequisites; they are not represented by empty
-passing jobs. Workflows have not been executed on GitHub.
+passing jobs. The first [GitHub Quality run](https://github.com/eugen-automation/playwright_maestro_rabota/actions/runs/41629764856)
+passed on 2026-11-03 for commit `941e53a`, covering TypeScript, ESLint, Prettier,
+and all seven foundation tests. The manual public read-only web smoke has not
+been executed on GitHub.
 
 ## Layout
 
