@@ -1,0 +1,7 @@
+flows:
+  - 'flows/**'
+excludeTags:
+  - logged-out
+  - state-reset
+  - destructive
+  - flaky

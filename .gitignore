@@ -1,0 +1,22 @@
+node_modules/
+dist/
+coverage/
+
+# Local environment files and secrets; keep only the placeholder template.
+.env
+.env.*
+!.env.example
+
+# Authentication state and generated artifacts.
+web/.auth/
+reports/
+playwright-report/
+test-results/
+.maestro/
+*.log
+*.tsbuildinfo
+
+# Local editor and OS files.
+.idea/
+.DS_Store
+Thumbs.db

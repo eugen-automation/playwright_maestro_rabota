@@ -1,0 +1,32 @@
+{
+  "name": "rabota-automation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:foundation": "tsx --test shared/config/load-env.test.ts web/fixtures/pom/read-only-policy.test.ts",
+    "test:web:ui": "playwright test --config web/playwright.config.ts --project ui-chromium",
+    "test:web:api": "playwright test --config web/playwright.config.ts --project api",
+    "test:web:e2e": "playwright test --config web/playwright.config.ts --project e2e-chromium",
+    "test:web:smoke": "playwright test --config web/playwright.config.ts --grep @smoke",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test:foundation"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
+    "eslint": "10.14.0",
+    "prettier": "3.9.10",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
+    "zod": "4.6.7"
+  }
+}
