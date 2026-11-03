@@ -1,4 +1,4 @@
-# Rabota.md automation
+# playwright_maestro_rabota
 
 Playwright + TypeScript foundation and a reserved Maestro scaffold, governed by
 [AGENTS.md](AGENTS.md). Production is the only verified target. No registration
@@ -82,6 +82,11 @@ interpreted as passing tests. Specs import `test` and `expect` from
 
 See [registration discovery](docs/specifications/registration-discovery.md) for
 observations, isolation prerequisites, implemented coverage, and dependency audit.
+
+The [detailed test-case catalog](docs/specifications/test-case-catalog.md) links
+the test plan to initial Web, API, Android/iOS, and synchronization cases. It
+tracks prerequisites and manual/automation statuses separately; proposed cases
+are not implemented coverage.
 
 ## CI
 
