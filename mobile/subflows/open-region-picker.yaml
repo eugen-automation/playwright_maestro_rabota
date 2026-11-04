@@ -1,0 +1,8 @@
+appId: ${APP_ID}
+---
+# No native ID is exposed. Scope the changing region label between stable controls.
+- tapOn:
+    text: '.+'
+    below: 'Cuvânt-cheie: jobul căutat'
+    above: 'Caută job'
+- assertVisible: 'Regiune'

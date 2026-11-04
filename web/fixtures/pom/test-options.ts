@@ -8,10 +8,12 @@ import { ROUTES } from '../../constants/routes.js';
 import { allowsRegistrationDocument } from './read-only-policy.js';
 import { WEB_TEST_SETTINGS } from '../../constants/test-settings.js';
 import { PublicJobsClient } from '../../../shared/api/clients/public-jobs-client.js';
+import { TestAccountAuthClient } from '../../../shared/api/clients/test-account-auth-client.js';
 
 type Fixtures = {
   registrationPage: RegistrationPage;
   publicJobsApi: PublicJobsClient;
+  testAccountAuthApi: TestAccountAuthClient;
   executionGuard: void;
 };
 
@@ -23,7 +25,13 @@ export const test = base.extend<Fixtures>({
       if (layer !== 'ui' && layer !== 'api' && layer !== 'e2e')
         throw new Error('Missing or invalid project layer.');
       const environment = readEnvironment();
-      requireRuntime(environment, layer);
+      requireRuntime(
+        environment,
+        layer === 'api' &&
+          testInfo.project.metadata.capability === 'test-account-auth'
+          ? 'auth'
+          : layer,
+      );
       const layerTags = testInfo.tags.filter((tag) =>
         ['@ui', '@api', '@e2e'].includes(tag),
       );
@@ -53,7 +61,12 @@ export const test = base.extend<Fixtures>({
   publicJobsApi: async ({ playwright, executionGuard }, use, testInfo) => {
     void executionGuard;
     const environment = readEnvironment();
-    if (testInfo.project.metadata.layer !== 'api' || !environment.apiBaseUrl) {
+    requireRuntime(environment, 'api');
+    if (
+      testInfo.project.metadata.layer !== 'api' ||
+      testInfo.project.metadata.capability === 'test-account-auth' ||
+      !environment.apiBaseUrl
+    ) {
       throw new Error(
         'Public jobs API fixture requires the opted-in API layer.',
       );
@@ -68,12 +81,56 @@ export const test = base.extend<Fixtures>({
       await client.dispose();
     }
   },
+  testAccountAuthApi: async ({ playwright, executionGuard }, use, testInfo) => {
+    void executionGuard;
+    const environment = readEnvironment();
+    requireRuntime(environment, 'auth');
+    if (
+      testInfo.project.use.trace !== 'off' ||
+      testInfo.project.use.screenshot !== 'off' ||
+      testInfo.project.use.video !== 'off'
+    ) {
+      throw new Error(
+        'Account authentication requires traces, screenshots and video to remain disabled.',
+      );
+    }
+    if (
+      testInfo.project.metadata.capability !== 'test-account-auth' ||
+      !environment.authBaseUrl ||
+      !environment.testAccountUsername ||
+      !environment.testAccountPassword
+    ) {
+      throw new Error(
+        'Account auth fixture is unavailable outside its opted-in project.',
+      );
+    }
+    const client = await TestAccountAuthClient.create(
+      playwright.request,
+      {
+        baseUrl: environment.authBaseUrl,
+        timeout: WEB_TEST_SETTINGS.timeouts.api,
+      },
+      {
+        username: environment.testAccountUsername,
+        password: environment.testAccountPassword,
+      },
+    );
+    try {
+      await use(client);
+    } finally {
+      await client.dispose();
+    }
+  },
   context: async ({ browser, executionGuard }, use, testInfo) => {
     void executionGuard;
     if (testInfo.project.metadata.layer !== 'e2e') {
       throw new Error('Browser contexts are unavailable to this test layer.');
     }
     const environment = readEnvironment();
+    testInfo.annotations.push({
+      type: 'browser-version',
+      description: browser.version(),
+    });
     if (!environment.webBaseUrl) throw new Error('Missing verified web URL.');
     // This initial public check reads server-rendered markup only. No scripts,
     // background requests, stylesheets, images, or form submissions go online.

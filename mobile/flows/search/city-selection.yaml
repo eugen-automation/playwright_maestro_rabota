@@ -1,0 +1,17 @@
+appId: ${APP_ID}
+name: 'AND-MOB-PUBLIC-FILTER-01 - City selection updates and resets the public search form'
+tags: [regression, search, read-only, android-only]
+env:
+  CITY_LABEL: Chișinău
+  ALL_REGIONS: Toată Moldova
+---
+- runFlow: ../../subflows/launch-app.yaml
+- runFlow: ../../subflows/open-region-picker.yaml
+- tapOn: ${CITY_LABEL}
+- assertNotVisible: 'Regiune'
+- assertVisible: ${CITY_LABEL}
+- runFlow: ../../subflows/open-region-picker.yaml
+- tapOn: ${ALL_REGIONS}
+- assertNotVisible: 'Regiune'
+- assertVisible: ${ALL_REGIONS}
+- assertVisible: 'Caută job'

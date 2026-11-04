@@ -1,12 +1,51 @@
 # QA Test Plan – Rabota.md
 
-**Scope:** Desktop web, backend APIs, Android and iOS; manual and automated testing.
-**Version:** 1.2. Capabilities below are proposed until verified.
+**Active scope:** Desktop web, backend APIs and Android; manual and automated testing.
+**Version:** 1.4. Capabilities below are proposed until verified.
+
+**iOS deferred by user instruction (2026-11-04):** No iOS devices/simulators are
+available. Do not implement or execute iOS tests in the current scope. Retain
+their IDs and candidate scenarios as deferred backlog, not failed, passed or
+unsupported coverage. Exclude them from current implementation/release gates
+and active coverage denominators. Resume only when a supported device/simulator
+and build become available and the user restores iOS scope. Cross-platform
+work may proceed for verified web/Android integrations; iOS legs remain deferred.
 
 Engineering rules: [root](../AGENTS.md), [Playwright](../web/AGENTS.md),
 [Maestro](../mobile/AGENTS.md). This plan owns coverage/priorities; the
 [architecture](ARCHITECTURE.md) owns paths, and the [catalog](specifications/test-case-catalog.md)
 owns detailed case statuses/evidence. Priority: **API → isolated UI → selected E2E/native**.
+
+## Current implementation and rule alignment
+
+Reviewed against the repository rules and working tree on 2026-11-04. The
+strategy follows the required layer boundaries, shared configuration/contracts,
+Romanian default, independent cases and controlled-write prerequisites. The
+project is partially implemented; the following gaps prevent claiming full
+compliance or readiness:
+
+| Area             | Observed state and required next action                                                                                                                                                                                                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Execution policy | Root `AGENTS.md` §2.1 now reflects the separately opted-in public read-only API and E2E scopes. Account authentication and writes still require approved non-production/disposable-account access; no such environment is available.                                                                                                                  |
+| Authentication   | Three API auth cases exist, but the runtime gate checks only configured origin, credentials and opt-in. It does not establish an approved non-production target, disposable identity or run ownership. Resolve the controlled-write gate before live authentication; credentials and a flag alone are insufficient.                                   |
+| Isolated UI      | The project is declared, but no UI specs, file-backed mocks or fixture-backed frontend are implemented. UI execution remains disabled; resolve the isolated-frontend gate before adding tests.                                                                                                                                                        |
+| Native mobile    | Android runner, verified shared configuration and six public read-only flows passed in combined smoke/regression runs on the selected device/build. Controlled-data/write cases remain gated; iOS implementation is deferred because no devices are available; see [native continuation](specifications/mobile-read-only-continuation-2026-11-04.md). |
+| CI               | Deferred by user instruction on 2026-11-04. Keep local quality checks; workflow activation and scheduled gates are outside the current implementation scope.                                                                                                                                                                                          |
+
+The public API's active whitespace-contract failure remains a release concern,
+not a reason to relax its schema or assertions. Its historical execution record
+is linked below; no new live pass is claimed. Local typecheck, lint, formatting
+and all 19 synthetic foundation tests passed during this review. Foundation
+tests required execution outside the sandbox after a `uv_os_get_passwd` startup
+failure; they use synthetic data/local servers. Live API/authentication, browser
+and device tests were **not executed** during this review, which did not enable
+targets, flags or CI jobs.
+
+Subsequent implementation stayed in the user-confirmed verified read-only scope:
+12 public API cases ran with **11 passed, 1 failed**, including two added
+normalization-input contract checks. The whitespace discrepancy remains active.
+See the [new execution record](specifications/api-read-only-increment-2026-11-04.md).
+The API opt-in was temporary to that process; `.env` was not modified.
 
 ## 1. Application scope
 
@@ -16,12 +55,12 @@ distribution links, build support and roles before writing executable cases.
 
 ### Testing priorities
 
-| Priority | Features | Rationale |
-| --- | --- | --- |
-| P0 – Critical | Login, registration, job search, city and combined filters, job details, CV submission, applying for jobs | Core user journeys |
-| P1 – High | Other filters, saved jobs, Smart CV, notifications, messaging, user profile, localization, mobile maps, employer registration and vacancy creation | Frequently used and business-critical |
-| P2 – Medium | Company profiles, advanced subscriptions, other employer tools | Supporting workflows |
-| P3 – Low | Minor UI details, informational pages, cosmetic issues | Low direct business impact |
+| Priority      | Features                                                                                                                                           | Rationale                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| P0 – Critical | Login, registration, job search, city and combined filters, job details, CV submission, applying for jobs                                          | Core user journeys                    |
+| P1 – High     | Other filters, saved jobs, Smart CV, notifications, messaging, user profile, localization, mobile maps, employer registration and vacancy creation | Frequently used and business-critical |
+| P2 – Medium   | Company profiles, advanced subscriptions, other employer tools                                                                                     | Supporting workflows                  |
+| P3 – Low      | Minor UI details, informational pages, cosmetic issues                                                                                             | Low direct business impact            |
 
 P0/P1 lead implementation at the lowest suitable layer. Employer publishing,
 payments and account/data changes require approved disposable accounts and a safe
@@ -37,24 +76,24 @@ negative/boundary and permission matrices; UI/E2E cover their distinct risks.
 
 ### 2.1 Desktop web – functional test scenarios
 
-| ID | Test scenario | Priority | Expected result |
-| --- | --- | --- | --- |
-| WEB-001 | Open homepage | P0 | Page loads with functional navigation and search |
-| WEB-002 | Search using a valid keyword | P0 | Relevant job results appear |
-| WEB-003 | Search using a nonexistent keyword | P1 | Appropriate empty-state message appears |
-| WEB-004 | Filter jobs by city | P0 | Results match selected location |
-| WEB-005 | Combine salary, city and remote filters | P0 | Results satisfy all selected filters |
-| WEB-006 | Open a vacancy | P0 | Correct title, employer and vacancy details appear |
-| WEB-007 | Register a candidate account | P0 | Account is created after required verification |
-| WEB-008 | Login with valid and invalid credentials | P0 | Valid login succeeds; invalid login is rejected |
-| WEB-009 | Create, edit and upload a CV | P0 | CV is saved correctly and accessible in the profile |
-| WEB-010 | Apply for a vacancy | P0 | Application is submitted and confirmation appears |
-| WEB-011 | Save and remove a job | P1 | Saved state persists correctly |
-| WEB-012 | Subscribe to job email alerts | P1 | Subscription and confirmation work correctly |
-| WEB-013 | Reset account password | P1 | Password reset follows the expected secure workflow |
-| WEB-014 | Switch website language RO/RU | P1 | Content and navigation update appropriately |
-| WEB-015 | Register an employer and create a vacancy | P1 | Permitted vacancy workflow works correctly |
-| WEB-016 | Session timeout and logout | P1 | Session and protected content are handled securely |
+| ID      | Test scenario                             | Priority | Expected result                                     |
+| ------- | ----------------------------------------- | -------- | --------------------------------------------------- |
+| WEB-001 | Open homepage                             | P0       | Page loads with functional navigation and search    |
+| WEB-002 | Search using a valid keyword              | P0       | Relevant job results appear                         |
+| WEB-003 | Search using a nonexistent keyword        | P1       | Appropriate empty-state message appears             |
+| WEB-004 | Filter jobs by city                       | P0       | Results match selected location                     |
+| WEB-005 | Combine salary, city and remote filters   | P0       | Results satisfy all selected filters                |
+| WEB-006 | Open a vacancy                            | P0       | Correct title, employer and vacancy details appear  |
+| WEB-007 | Register a candidate account              | P0       | Account is created after required verification      |
+| WEB-008 | Login with valid and invalid credentials  | P0       | Valid login succeeds; invalid login is rejected     |
+| WEB-009 | Create, edit and upload a CV              | P0       | CV is saved correctly and accessible in the profile |
+| WEB-010 | Apply for a vacancy                       | P0       | Application is submitted and confirmation appears   |
+| WEB-011 | Save and remove a job                     | P1       | Saved state persists correctly                      |
+| WEB-012 | Subscribe to job email alerts             | P1       | Subscription and confirmation work correctly        |
+| WEB-013 | Reset account password                    | P1       | Password reset follows the expected secure workflow |
+| WEB-014 | Switch website language RO/RU             | P1       | Content and navigation update appropriately         |
+| WEB-015 | Register an employer and create a vacancy | P1       | Permitted vacancy workflow works correctly          |
+| WEB-016 | Session timeout and logout                | P1       | Session and protected content are handled securely  |
 
 Verify filter capabilities and rules during discovery. For applications, split
 success, missing CV, duplicates, expired vacancies, failure presentation and
@@ -66,38 +105,41 @@ every surface.
 Select native-specific and critical integration risks after API coverage.
 Verify and record Android/iOS support independently; this is a candidate inventory.
 
-| ID | Test scenario | Priority | Expected result |
-| --- | --- | --- | --- |
-| MOB-001 | Install and launch the app | P0 | App launches without crashing |
-| MOB-002 | Search jobs using a keyword | P0 | Correct results are displayed |
-| MOB-003 | Apply city and salary filters | P0 | Results update accurately |
-| MOB-004 | Open job details and return to search | P0 | Correct vacancy opens and search state is retained |
-| MOB-005 | Register and log in | P0 | Authentication works correctly |
-| MOB-006 | Apply for a vacancy using a CV | P0 | Application is submitted |
-| MOB-007 | Save a job to favorites | P1 | Job remains saved after reopening |
-| MOB-008 | Open a job from a deep link | P1 | App navigates to the correct job |
-| MOB-009 | Receive and open a push notification | P1 | Correct notification and destination appear |
-| MOB-010 | Search for jobs on the map | P1 | Results correspond to selected location |
-| MOB-011 | Send and receive a chat message | P1 | Messages display and synchronize |
-| MOB-012 | Background and resume the application | P1 | App preserves appropriate state |
-| MOB-013 | Test offline and unstable network conditions | P1 | Errors are handled without crashes |
-| MOB-014 | Deny and later grant location permissions | P1 | App handles permission changes |
-| MOB-015 | Update an installed app | P1 | Existing account and saved data are preserved |
+| ID      | Test scenario                                | Priority | Expected result                                    |
+| ------- | -------------------------------------------- | -------- | -------------------------------------------------- |
+| MOB-001 | Install and launch the app                   | P0       | App launches without crashing                      |
+| MOB-002 | Search jobs using a keyword                  | P0       | Correct results are displayed                      |
+| MOB-003 | Apply city and salary filters                | P0       | Results update accurately                          |
+| MOB-004 | Open job details and return to search        | P0       | Correct vacancy opens and search state is retained |
+| MOB-005 | Register and log in                          | P0       | Authentication works correctly                     |
+| MOB-006 | Apply for a vacancy using a CV               | P0       | Application is submitted                           |
+| MOB-007 | Save a job to favorites                      | P1       | Job remains saved after reopening                  |
+| MOB-008 | Open a job from a deep link                  | P1       | App navigates to the correct job                   |
+| MOB-009 | Receive and open a push notification         | P1       | Correct notification and destination appear        |
+| MOB-010 | Search for jobs on the map                   | P1       | Results correspond to selected location            |
+| MOB-011 | Send and receive a chat message              | P1       | Messages display and synchronize                   |
+| MOB-012 | Background and resume the application        | P1       | App preserves appropriate state                    |
+| MOB-013 | Test offline and unstable network conditions | P1       | Errors are handled without crashes                 |
+| MOB-014 | Deny and later grant location permissions    | P1       | App handles permission changes                     |
+| MOB-015 | Update an installed app                      | P1       | Existing account and saved data are preserved      |
 
 ### 2.3 Cross-platform testing
 
-| Area | Desktop | Android | iOS |
-| --- | --- | --- | --- |
-| Search and filters | Yes | Yes | Yes |
-| Candidate login | Yes | Yes | Yes |
-| Job details | Yes | Yes | Yes |
-| CV submission | Yes | Yes | Yes |
-| Favorites synchronization | Yes | Yes | Yes |
-| Notifications | Email/browser as supported | Push | Push |
-| Deep links | URL navigation | Android App Links | Universal Links |
-| Background/resume | Browser state | App lifecycle | App lifecycle |
-| Maps/location | As supported | Yes | Yes |
-| Employer workflows | Full applicable scope | As supported | As supported |
+This is a proposed coverage matrix, not verified platform support or executed
+coverage. Every entry requires feature/build discovery for the named platform.
+
+| Area                      | Desktop                    | Android           | iOS             |
+| ------------------------- | -------------------------- | ----------------- | --------------- |
+| Search and filters        | Yes                        | Yes               | Yes             |
+| Candidate login           | Yes                        | Yes               | Yes             |
+| Job details               | Yes                        | Yes               | Yes             |
+| CV submission             | Yes                        | Yes               | Yes             |
+| Favorites synchronization | Yes                        | Yes               | Yes             |
+| Notifications             | Email/browser as supported | Push              | Push            |
+| Deep links                | URL navigation             | Android App Links | Universal Links |
+| Background/resume         | Browser state              | App lifecycle     | App lifecycle   |
+| Maps/location             | As supported               | Yes               | Yes             |
+| Employer workflows        | Full applicable scope      | As supported      | As supported    |
 
 Synchronization cases are self-contained integrations using the same disposable
 identity and owned data across selected surfaces, with independent setup/cleanup.
@@ -122,21 +164,26 @@ support verification. Never coordinate ordered tests or reuse personal-device au
 
 ### Desktop browsers
 
-| Coverage | Configuration |
-| --- | --- |
-| Primary | Chrome – Windows |
-| Secondary | Firefox and Edge – Windows |
-| Safari | macOS |
+| Coverage        | Configuration                 |
+| --------------- | ----------------------------- |
+| Primary         | Chrome – Windows              |
+| Secondary       | Firefox and Edge – Windows    |
+| Safari          | macOS                         |
 | Viewport checks | 1366×768, 1440×900, 1920×1080 |
+
+Windows registration-document smoke has now passed in Chromium, installed
+Chrome/Edge and Playwright-managed Firefox. This is limited markup coverage;
+interactive/visual checks and desktop Safari/macOS retain their prerequisites.
+See [verification details](specifications/mobile-read-only-continuation-2026-11-04.md).
 
 ### Native mobile devices
 
-| Area | Coverage |
-| --- | --- |
-| Android | Representative Samsung and Pixel devices; latest, previous and oldest supported Android versions |
-| iOS | Representative iPhones; minimum supported and selected newer versions verified against the chosen app build |
-| Network | Wi-Fi, cellular, offline and high-latency conditions |
-| Orientation | Portrait and landscape where supported |
+| Area        | Coverage                                                                                                    |
+| ----------- | ----------------------------------------------------------------------------------------------------------- |
+| Android     | Representative Samsung and Pixel devices; latest, previous and oldest supported Android versions            |
+| iOS         | Representative iPhones; minimum supported and selected newer versions verified against the chosen app build |
+| Network     | Wi-Fi, cellular, offline and high-latency conditions                                                        |
+| Orientation | Portrait and landscape where supported                                                                      |
 
 Record exact browser/channel, OS, device and app build. Chromium/Firefox/WebKit
 results certify only their tested engines; Safari needs macOS and explicit
@@ -178,15 +225,15 @@ Implement backend contracts and business outcomes first, after verifying the
 authorized target, methods, relative paths, authentication and response shapes.
 Read-only search/vacancy cases come first; writes require the controlled-data gate.
 
-| Area | API-owned coverage |
-| --- | --- |
-| Search | Matching/empty results, filters, combinations, pagination, invalid/boundary inputs |
-| Vacancy details | Identity/content, missing/expired/removed records and visibility |
-| Registration/authentication | Server validation, valid/invalid credentials, role permissions, sessions and approved verification |
-| CV/profile | Validation, uploads, ownership, persistence and unauthorized operations |
-| Applications | Eligibility, duplicate/unavailable states, ownership and persisted read-back |
-| Saved jobs | Add/read/remove, duplicates, ownership and persistence |
-| Notifications/messaging/employer | Verified access, payload, state and permission rules where supported |
+| Area                             | API-owned coverage                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Search                           | Matching/empty results, filters, combinations, pagination, invalid/boundary inputs                 |
+| Vacancy details                  | Identity/content, missing/expired/removed records and visibility                                   |
+| Registration/authentication      | Server validation, valid/invalid credentials, role permissions, sessions and approved verification |
+| CV/profile                       | Validation, uploads, ownership, persistence and unauthorized operations                            |
+| Applications                     | Eligibility, duplicate/unavailable states, ownership and persisted read-back                       |
+| Saved jobs                       | Add/read/remove, duplicates, ownership and persistence                                             |
+| Notifications/messaging/employer | Verified access, payload, state and permission rules where supported                               |
 
 [API cases](specifications/api-cases.md) define the initial independent scenarios.
 Do not infer contracts from this inventory. Shared strict schemas and typed
@@ -204,17 +251,17 @@ real-device assessment. iOS simulators require a suitable macOS runner/build.
 The following retained IDs map candidate flows, not promised implementations.
 [Mobile cases](specifications/mobile-cases.md) track Android and iOS separately.
 
-| ID | Candidate risk |
-| --- | --- |
-| MAESTRO-001 | Launch/home readiness |
-| MAESTRO-002 | Critical keyword search |
-| MAESTRO-003 | Filter controls/integration |
-| MAESTRO-004 | Detail/return navigation |
-| MAESTRO-005 | Selected login/logout wiring |
-| MAESTRO-006 | Saved-job integration |
-| MAESTRO-007 | Controlled application submission |
-| MAESTRO-008 | Reopen/state preservation |
-| MAESTRO-009 | Deep-link routing |
+| ID          | Candidate risk                           |
+| ----------- | ---------------------------------------- |
+| MAESTRO-001 | Launch/home readiness                    |
+| MAESTRO-002 | Critical keyword search                  |
+| MAESTRO-003 | Filter controls/integration              |
+| MAESTRO-004 | Detail/return navigation                 |
+| MAESTRO-005 | Selected login/logout wiring             |
+| MAESTRO-006 | Saved-job integration                    |
+| MAESTRO-007 | Controlled application submission        |
+| MAESTRO-008 | Reopen/state preservation                |
+| MAESTRO-009 | Deep-link routing                        |
 | MAESTRO-010 | Native authentication error presentation |
 
 ### 4.4 Canonical automation project structure
@@ -226,14 +273,16 @@ tooling executes outside Maestro's JS runtime. Planned paths do not prove capabi
 
 ## 5. CI/CD and execution schedule
 
-| Trigger | Target coverage when ready |
-| --- | --- |
-| Pull request | Quality checks, eligible API smoke/regression, focused isolated UI smoke |
-| Staging deployment | API release gate, focused UI, selected web/native integration |
-| Nightly | Broad API regression, smaller UI and selected E2E/platform checks |
-| Weekly | Targeted browser/real-device/accessibility matrix |
-| Release | Eligible P0/P1 automation plus risk-based manual regression |
+| Trigger            | Target coverage when ready                                               |
+| ------------------ | ------------------------------------------------------------------------ |
+| Pull request       | Quality checks, eligible API smoke/regression, focused isolated UI smoke |
+| Staging deployment | API release gate, focused UI, selected web/native integration            |
+| Nightly            | Broad API regression, smaller UI and selected E2E/platform checks        |
+| Weekly             | Targeted browser/real-device/accessibility matrix                        |
+| Release            | Eligible P0/P1 automation plus risk-based manual regression              |
 
+CI implementation is deferred by user instruction; this section describes future
+requirements and is not a blocker for the current local implementation work.
 These are target gates, not currently enabled schedules. Prioritize API feedback;
 each test remains independent and isolated UI can run independently once ready.
 Use separate layer-identifiable jobs/reports. Add jobs only with real coverage and
@@ -266,14 +315,32 @@ screenshots under ignored `reports/web/` or `reports/mobile/`.
 - All restrictions apply to manual work too. A URL change never authorizes
   production writes or enables an additional runtime.
 
+## Remaining implementation prerequisites
+
+The user confirmed on 2026-11-04 that no maintained frontend source/test build
+or verified API documentation with controlled data is available. Record the
+following as prerequisites, not implemented or passing coverage.
+
+- Broader API search/filter/error/permission cases need verified operation contracts
+  and deterministic approved datasets; existing public taxonomy/VIP checks do not
+  supply those prerequisites. The whitespace contract discrepancy remains open.
+- Isolated web UI needs a maintained real frontend source/test build backed entirely
+  by fixtures, including server rendering. No such build/server is present here.
+- Authentication, CV/profile, applications, saved jobs and synchronization need
+  approved non-production access, disposable identities, owned data and cleanup.
+  The production phone does not authorize these operations.
+- Offline/permission/state-reset work needs an explicitly approved reserved-device
+  setup; do not change this personal phone's network or reset its app/account.
+- iOS implementation is deferred for lack of devices; CI remains user-deferred.
+
 ## 7. Proposed implementation roadmap
 
-| Stage | Deliverable and exit evidence |
-| --- | --- |
-| 1. API discovery | Verified contracts, authorized target/scope, deterministic datasets and ownership/cleanup plan; retain shared tooling foundation |
-| 2. API implementation | Strict shared schemas, typed clients and fixtures; search/vacancy smoke followed by broad negative/boundary, permission and persistence cases; eligible API CI |
-| 3. Isolated UI | Real frontend fixture/server isolation, verified response files, focused POMs/rendering/interactions/client validation and UI CI |
-| 4. Selected E2E/native | Independently owned critical integrations, verified Maestro runner/helpers/builds, targeted synchronization/compatibility and layer-based reporting |
+| Stage                  | Deliverable and exit evidence                                                                                                                                  |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. API discovery       | Verified contracts, authorized target/scope, deterministic datasets and ownership/cleanup plan; retain shared tooling foundation                               |
+| 2. API implementation  | Strict shared schemas, typed clients and fixtures; search/vacancy smoke followed by broad negative/boundary, permission and persistence cases; eligible API CI |
+| 3. Isolated UI         | Real frontend fixture/server isolation, verified response files, focused POMs/rendering/interactions/client validation and UI CI                               |
+| 4. Selected E2E/native | Independently owned critical integrations, verified Maestro runner/helpers/builds, targeted synchronization/compatibility and layer-based reporting            |
 
 Stages follow readiness rather than a fixed calendar. Keep scenario discovery,
 manual design and traceability current throughout. Preserve the limited existing
@@ -282,11 +349,11 @@ Unverified capabilities stay blocked; implementation is not execution evidence.
 
 ## 8. Quality metrics and release criteria
 
-| Initial planning target | Value |
-| --- | --- |
-| P0 executed scenario coverage | 100% |
-| Suitable P0/P1 automation coverage | 90% / 70% |
-| Run stability in a controlled healthy environment | 98% |
+| Initial planning target                           | Value     |
+| ------------------------------------------------- | --------- |
+| P0 executed scenario coverage                     | 100%      |
+| Suitable P0/P1 automation coverage                | 90% / 70% |
+| Run stability in a controlled healthy environment | 98%       |
 
 These are proposed targets to review after a baseline, not measured results or
 permission to execute. Define the agreed detailed-case denominator, automation
@@ -308,8 +375,13 @@ targeted manual assessment and a regression report with known limitations.
 - Eligible CI gates, redacted reports and browser/device/build matrix.
 - Release readiness report and maintained setup/triage instructions.
 
-The first public API increment has four authored read-only autocomplete/VIP
-identity cases, with [discovery evidence](specifications/api-discovery.md) and
-execution deferred. Next expand verified contracts and controlled datasets for
-the broader search/vacancy matrix. See the [catalog](specifications/test-case-catalog.md)
+The public API increment has twelve implemented read-only autocomplete/VIP
+identity cases, with [discovery evidence](specifications/api-discovery.md) and a
+[latest executed result](specifications/api-read-only-increment-2026-11-04.md):
+eleven passed and one active whitespace contract regression failed. Casing
+identity is now observed for the selected Latin/Romanian pairs. The two new
+padded/accentless-input cases validate contracts without defining normalization
+policy. Earlier records remain historical.
+Next expand verified
+contracts and controlled datasets for the broader search/vacancy matrix. See the [catalog](specifications/test-case-catalog.md)
 for gates and detailed records. No execution is implied by this roadmap.

@@ -1,0 +1,11 @@
+appId: ${APP_ID}
+name: 'AND-MOB-PUBLIC-SEARCH-02 - Selected profession opens current results'
+tags: [smoke, search, read-only, android-only]
+---
+- runFlow: ../../subflows/launch-app.yaml
+- runFlow: ../../subflows/search-programmer-jobs.yaml
+- assertNotVisible: 'Selectează postul'
+- assertVisible: '(?-i)^Programator$'
+# Verified multiline card shape; no fixed vacancy, order or count is assumed.
+- assertVisible:
+    text: '(?s).+\n.+\n.+\nActualizat:.*'

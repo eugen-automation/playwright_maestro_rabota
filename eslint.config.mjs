@@ -41,4 +41,11 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ['mobile/scripts/**/*.js'],
+    languageOptions: {
+      sourceType: 'script',
+      globals: { maestro: 'readonly', output: 'readonly' },
+    },
+  },
 );

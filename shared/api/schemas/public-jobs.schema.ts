@@ -10,6 +10,10 @@ export const JobSuggestionsResponseSchema = z.strictObject({
   ),
 });
 
+// Empty-query behavior was observed independently; do not accept populated results here.
+export const EmptyJobSuggestionsResponseSchema =
+  JobSuggestionsResponseSchema.extend({ suggestions: z.tuple([]) });
+
 // This schema covers the observed VIP popup. Check standard/free listings
 // and custom links before adding support for those responses.
 export const VipVacancyResponseSchema = z.strictObject({

@@ -1,6 +1,6 @@
 # Detailed test-case catalog
 
-Created 2026-11-03. Updated to the API-first testing-pyramid strategy on 2026-11-03.
+Created 2026-11-03. Updated for executed API coverage on 2026-11-04.
 
 Sources: [test plan](../TEST_PLAN.md), [engineering rules](../../AGENTS.md),
 [registration discovery](registration-discovery.md), and
@@ -12,12 +12,21 @@ the test plan, pending product/discovery confirmation. They are not observations
 of working features. No new application behavior was inspected or executed while
 creating this catalog.
 
-Current inventory: **59 case instances** — 12 API (4 implemented public read-only,
+Current inventory: **72 case instances** — 20 API (12 implemented public read-only,
 8 controlled-data candidates), 27 web (26 proposed UI and the existing limited
-E2E), 16 native mobile and 4 cross-platform instances. The original 55 IDs are
-retained; four new public API IDs record the first observed-contract increment.
-Five cases are implemented, but only the original E2E has a prior recorded pass.
-The four new API cases are **not run**; the other 54 remain proposed/unimplemented.
+E2E), 21 native mobile and 4 cross-platform instances. The original 55 IDs are
+retained alongside twelve public API IDs and five supplemental native public cases.
+Nineteen catalog cases are implemented:
+the original E2E retains its prior pass, and the latest public API run has
+**11 passes, 1 failure**, including casing-identity and normalization-input
+contract checks. Six Android public flows have passed individually on the
+selected device/build; see the [native continuation](mobile-read-only-continuation-2026-11-04.md).
+The other 53 cases are not implemented: ten iOS instances (eight native and two
+synchronization) are explicitly deferred; 43 active candidates retain unmet
+discovery/environment/data prerequisites. The three
+auth specs in the working tree are not promoted into this catalog or authorized
+for live execution; their controlled-environment prerequisites remain unresolved.
+See the [latest implementation/execution record](api-read-only-increment-2026-11-04.md).
 Tooling tests and undetailed backlog are excluded. Counts are not a target pyramid
 ratio or executed coverage. Keep API first, UI focused and E2E selective; see
 [coverage ownership](testing-pyramid.md) and [API discovery](api-discovery.md).
@@ -49,8 +58,10 @@ result are separate fields. Defaults for all proposed cases are:
 | Evidence                  | None; add a dated execution record before claiming a result |
 
 Exceptions: `E2E-WEB-007-01` is implemented with a prior Chromium pass recorded
-in the foundation baseline. The four `API-PUBLIC-*` cases have observed contracts
-and implementation, with execution deferred. No manual test pass is recorded for
+in the foundation baseline. The eight `API-PUBLIC-*` cases are implemented and
+executed; seven passed and one failed. See the [execution record](api-execution-2026-11-04.md).
+`API-PUBLIC-SUGGEST-08/09` are implemented with no live execution result.
+No manual test pass is recorded for
 these cases. The markup check does not complete `WEB-007`, and public API checks
 do not complete controlled search/detail business-rule coverage.
 
@@ -67,7 +78,7 @@ names, selectors, numeric limits, or platform identifiers.
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D — Discovery         | Dated requirements or observed behavior for the selected feature/build: navigation, controls, supported inputs, expected outcomes, locale, and relevant contracts. Resolve each case's open questions.                                                                                                                                                                                       |
 | U — Isolated frontend | Maintained real frontend build/server backed by fixtures, including server-rendered data. Verified synthetic response files and strict shared schemas where JSON is modeled. Fixture interception installed before navigation; unexpected backend activity fails; service workers and observed alternative transports cannot bypass isolation. No real clients, seeders, or backend traffic. |
-| A — Authorized API    | Verified origin, methods/paths, contracts and access scope, shared configuration/clients and separate runtime opt-in. Resolved only for the four observed public read-only cases; broader controlled-data and write cases remain gated.                                                                                                                                                      |
+| A — Authorized API    | Verified origin, methods/paths, contracts and access scope, shared configuration/clients and separate runtime opt-in. Resolved only for the observed public GET operations and modeled inputs; broader controlled-data and write cases remain gated.                                                                                                                                         |
 | W — Controlled writes | Approved non-production target, explicit execution opt-in, disposable account(s), controlled vacancies, unique run/test ownership, validated setup and cleanup limited to owned records. Applies to manual execution too, including authentication, email, saved jobs, and profile changes. A URL override cannot enable writes.                                                             |
 | M — Mobile readiness  | Verified installed build and platform identifier, supported OS/device, Romanian UI hierarchy, deterministic startup/authentication, shared runner and reporting. No reliance on a previously signed-in device.                                                                                                                                                                               |
 | I — iOS readiness     | Suitable macOS simulator runner/build or approved supported physical-device setup, with iOS-specific identifier and hierarchy verified. Windows does not supply an iOS simulator.                                                                                                                                                                                                            |
@@ -132,8 +143,25 @@ need separate detailed cases once their contracts are available.
 
 ## Mobile traceability
 
+iOS instances are deferred by user instruction because devices/simulators are
+unavailable. Retain their IDs in the total inventory, but exclude them from
+active implementation/release gates and current coverage denominators.
+
 Each detailed template has two independently tracked platform instances. A
 shared description never establishes support or a pass on the other platform.
+
+The Android Home case and supplemental
+[AND-MOB-PUBLIC-SEARCH-01](mobile-cases.md#and-mob-public-search-01) are implemented
+and passed; see the [native execution record](mobile-implementation-2026-11-04.md).
+The supplemental case adds one Android instance and verifies picker navigation
+only; the existing controlled-result search cases retain their unmet data gates.
+
+Four further [public Android cases](mobile-cases.md#additional-public-android-cases)
+cover profession results, title/employer detail navigation, region form state and
+background/resume. They add four instances, without promoting controlled-data
+matching/filter/detail cases to ready. The Android resume backlog now has this
+limited public-screen proof; interrupted writes and broader lifecycle behavior
+remain prerequisites-dependent work.
 
 | Plan group                  | Priority | Detailed template / remaining work                                                                                                     | Maestro plan mapping                   |
 | --------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
@@ -185,9 +213,10 @@ requests; setup/cleanup is validated too.
 
 ## Implementation order
 
-The initial public GET-only increment is implemented and not executed; it covers
-observed autocomplete and VIP identity only. Continue the broader matrix below
-without treating that limited increment as controlled search/detail coverage.
+The public GET-only increment has twelve implemented cases: eleven passed and the
+whitespace contract regression failed in the latest 2026-11-04 run. It covers observed
+autocomplete inputs and VIP identity only. Continue the broader matrix below
+without treating this as controlled search/detail coverage.
 
 1. Resolve D and A for API search and vacancy details: verify authorized target,
    contracts, semantics and deterministic data. Missing API access is the first

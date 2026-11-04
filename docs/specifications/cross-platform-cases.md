@@ -15,6 +15,10 @@ automation suitability **candidate**, evidence **none**. Both manual and
 automated execution are blocked by D, A, W and M; iOS additionally requires I.
 Initial platform statuses are recorded separately below.
 
+iOS legs are deferred by user instruction on 2026-11-04 because no iOS devices
+or simulators are available. Retain their IDs as backlog and exclude them from
+active implementation/release gates; Android legs retain their existing gates.
+
 These are self-contained orchestrated integration scenarios. Each owns the same
 disposable account across its two surfaces, controlled vacancy, authenticated
 startup and cleanup. They do not coordinate separately ordered tests or reuse a
@@ -48,7 +52,7 @@ A job saved on desktop appears on mobile.
 | Case ID      | Platforms         | Manual execution          | Automation implementation | Automation result         |
 | ------------ | ----------------- | ------------------------- | ------------------------- | ------------------------- |
 | AND-SYNC-001 | Desktop + Android | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-SYNC-001 | Desktop + iOS     | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| IOS-SYNC-001 | Desktop + iOS     | Deferred - no devices     | Deferred by user          | Not executed - deferred   |
 
 ### SYNC-002
 
@@ -68,7 +72,7 @@ A job removed on desktop disappears from mobile saved jobs.
 | Case ID      | Platforms         | Manual execution          | Automation implementation | Automation result         |
 | ------------ | ----------------- | ------------------------- | ------------------------- | ------------------------- |
 | AND-SYNC-002 | Desktop + Android | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-SYNC-002 | Desktop + iOS     | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| IOS-SYNC-002 | Desktop + iOS     | Deferred - no devices     | Deferred by user          | Not executed - deferred   |
 
 CV and application synchronization remain explicit backlog under test plan §2.3;
 create separate cases after support and safe data ownership are verified.

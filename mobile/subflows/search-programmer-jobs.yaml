@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+env:
+  SEARCH_QUERY: programator
+---
+- tapOn: 'Cuvânt-cheie: jobul căutat'
+- assertVisible: 'Selectează postul'
+- inputText: ${SEARCH_QUERY}
+# The lowercase editable query and capitalized suggestion otherwise both match.
+- tapOn:
+    text: '(?-i)^Programator$'
+# Technical readiness marker for the observed public results screen.
+- assertVisible: 'După dată'

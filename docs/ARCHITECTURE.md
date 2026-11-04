@@ -24,7 +24,8 @@ automation/
 ├── shared/
 │   ├── config/
 │   │   ├── env.schema.ts
-│   │   └── load-env.ts
+│   │   ├── load-env.ts
+│   │   └── mobile-settings.ts
 │   ├── api/
 │   │   ├── clients/
 │   │   ├── schemas/

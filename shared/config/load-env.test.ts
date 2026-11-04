@@ -71,3 +71,44 @@ test('obsolete environment selection and URL override are rejected', () => {
   assert.throws(() => readEnvironment(cases.legacySelection), /Legacy/);
   assert.throws(() => readEnvironment(cases.legacyOverride), /Legacy/);
 });
+
+test('account authentication requires its own explicit target, credentials and opt-in', () => {
+  for (const input of [
+    cases.valid,
+    cases.optedIn,
+    cases.apiOptedIn,
+    cases.authConfigured,
+  ]) {
+    assert.throws(
+      () => requireRuntime(readEnvironment(input), 'auth'),
+      /AUTH_BASE_URL.*TEST_ACCOUNT_USERNAME.*TEST_ACCOUNT_PASSWORD.*ALLOW_TEST_ACCOUNT_AUTH/,
+    );
+  }
+  for (const key of [
+    'AUTH_BASE_URL',
+    'TEST_ACCOUNT_USERNAME',
+    'TEST_ACCOUNT_PASSWORD',
+  ] as const) {
+    const incomplete = { ...cases.authOptedIn, [key]: undefined };
+    assert.throws(
+      () => requireRuntime(readEnvironment(incomplete), 'auth'),
+      /authentication is disabled/,
+    );
+  }
+  requireRuntime(readEnvironment(cases.authOptedIn), 'auth');
+});
+
+test('account opt-in cannot enable other runtimes and refuses a different origin', () => {
+  const environment = readEnvironment(cases.authOptedIn);
+  for (const runtime of ['api', 'e2e', 'ui', 'android', 'ios'] as const) {
+    assert.throws(
+      () => requireRuntime(environment, runtime),
+      /disabled|ALLOW_PRODUCTION_READ_ONLY/,
+    );
+  }
+  assert.throws(() => readEnvironment(cases.authWrongOrigin), /AUTH_BASE_URL/);
+  assert.throws(
+    () => readEnvironment(cases.invalidAuthOptIn),
+    /ALLOW_TEST_ACCOUNT_AUTH/,
+  );
+});

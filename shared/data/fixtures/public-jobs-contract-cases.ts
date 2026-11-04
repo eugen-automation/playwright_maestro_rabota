@@ -3,6 +3,9 @@ const vacancyPath = '/ro/locuri-de-munca/synthetic-vacancy/123';
 
 export const PUBLIC_JOBS_CONTRACT_CASES = {
   suggestions: { suggestions: [{ value: 'Synthetic profession', data: 123 }] },
+  emptySuggestions: { suggestions: [] },
+  // Sanitized reproduction of the blank label observed for whitespace input.
+  blankSuggestion: { suggestions: [{ value: '', data: 123 }] },
   vacancy: {
     vacancy_model: null,
     data: {

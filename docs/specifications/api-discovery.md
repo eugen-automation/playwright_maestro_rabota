@@ -7,8 +7,11 @@ WebSockets were blocked, and service workers disabled. No account, application,
 saved-job or other write action was performed.
 
 These are observations, not published provider guarantees or passing test results.
-The four authored API cases and foundation checks have **not been executed** at
-the user's request. No CI run/push was triggered.
+Execution was originally deferred on 2026-11-03. The user authorized local and
+public read-only API checks on 2026-11-04. The expanded suite has eight implemented
+cases: **7 passed, 1 failed**; all 14 foundation checks passed. See the
+[execution record](api-execution-2026-11-04.md) and the active
+[whitespace contract discrepancy](api-contract-001.md). No CI run/push was triggered.
 
 ## Observed traffic
 
@@ -49,10 +52,10 @@ in committed fixtures; temporary captures were removed after documentation.
 
 ## Implemented increment
 
-| Cases                         | Scope                                                                                                      | Status               |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------- |
-| `API-PUBLIC-SUGGEST-01/02/03` | Strict autocomplete contract and the three observed profession labels, including Romanian diacritics       | Implemented, not run |
-| `API-PUBLIC-VACANCY-01`       | Fetch current search HTML, select a supported VIP route, validate strict popup JSON and requested identity | Implemented, not run |
+| Cases                         | Scope                                                                                                      | Status            |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------- |
+| `API-PUBLIC-SUGGEST-01/02/03` | Strict autocomplete contract and the three observed profession labels, including Romanian diacritics       | Passed 2026-11-04 |
+| `API-PUBLIC-VACANCY-01`       | Fetch current search HTML, select a supported VIP route, validate strict popup JSON and requested identity | Passed 2026-11-04 |
 
 Sources: [specs](../../web/tests/api/public-jobs.spec.ts),
 [strict schemas](../../shared/api/schemas/public-jobs.schema.ts),
@@ -84,3 +87,64 @@ to call account endpoints. Notifications and cleanup remain separately gated.
 
 References: [Playwright isolated API contexts](https://playwright.dev/docs/api-testing#context-request-vs-global-request)
 and [API redirect/retry controls](https://playwright.dev/docs/api/class-apirequestcontext).
+
+## Autocomplete input observations — 2026-11-04
+
+All observations used the same verified GET endpoint and isolated request client.
+Only status, bounded taxonomy summaries and the relevant contract discrepancy
+were retained in documentation; no complete live response is committed.
+
+| Input              | Observed HTTP/JSON behavior                                                                  | New case              |
+| ------------------ | -------------------------------------------------------------------------------------------- | --------------------- |
+| Empty string       | 200; `suggestions: []`                                                                       | API-PUBLIC-SUGGEST-04 |
+| `PROGRAMATOR`      | 200; existing strict schema passes and `Programator` is present                              | API-PUBLIC-SUGGEST-05 |
+| `ȘOFER`            | 200; existing strict schema passes and `Șofer` is present                                    | API-PUBLIC-SUGGEST-06 |
+| Three ASCII spaces | 200; populated suggestions include an empty `value`; existing non-empty-label contract fails | API-PUBLIC-SUGGEST-07 |
+
+The empty-query contract is modeled separately by
+`EmptyJobSuggestionsResponseSchema`; the normal schema was not widened.
+Whitespace policy still requires product confirmation; the active regression
+checks the existing non-empty/usable-label invariant rather than assuming a
+particular zero-result or error status. See [API-CONTRACT-001](api-contract-001.md).
+
+Additional discovery: a space-padded Latin profession query returned no
+suggestions, while an accentless driver query did not include the exact
+Romanian-diacritic label. No normalization policy was inferred or permanent
+assertion added for these observations. Empty input is not a controlled empty
+job-search dataset.
+
+The eight-case API run and 14 local foundation checks are documented in the
+[execution record](api-execution-2026-11-04.md). The suite remains unsuccessful
+until the whitespace discrepancy is resolved through product/API triage.
+
+## Casing identity implementation — 2026-11-04
+
+`API-PUBLIC-SUGGEST-08/09` reuse the observed Latin and Romanian query pairs to
+compare the expected label's taxonomy ID across casing. Each independent test
+validates both HTTP/JSON contracts and requires exactly one matching label in
+each response. Result order and unrelated suggestions are not compared.
+
+No new network discovery was performed. The query/label pairs are observed;
+identity equality and uniqueness are proposed regression expectations awaiting
+live verification. Both tests are implemented but **not executed**, with
+`ALLOW_PUBLIC_READ_ONLY_API=false` left unchanged. The public suite now has ten
+implemented cases; the earlier eight-case execution result remains historical.
+See the [implementation record](api-implementation-2026-11-04.md).
+
+## Read-only continuation — 2026-11-04
+
+The user confirmed there is no non-production environment and directed continued
+work within the verified read-only scope, with CI deferred. Two independent
+regressions now validate the existing JSON suggestions contract for exactly
+`programator` with one ASCII space on each side and `sofer`. These input categories were observed earlier;
+the latest execution confirms HTTP 200, JSON media type and the existing strict
+schema for the exact typed inputs. No trimming/accent policy or exact result
+membership is inferred.
+
+The same twelve-case public run verified the previously pending casing-identity
+checks for the selected Latin/Romanian pairs. Result: **11 passed, 1 failed**;
+the original whitespace discrepancy remains active. No authentication, writes,
+new endpoints, schema relaxation or CI activation was introduced. The API opt-in
+was process-local and `.env` was unchanged. Earlier not-run statements above
+describe the earlier implementation point, not the latest status. See the
+[latest record](api-read-only-increment-2026-11-04.md).

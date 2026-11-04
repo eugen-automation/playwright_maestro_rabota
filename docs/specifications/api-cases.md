@@ -3,8 +3,8 @@
 Source: [test plan §4.2](../TEST_PLAN.md#42-api-automation--playwright-apirequestcontext)
 and the linked feature groups in each case.
 [Catalog](test-case-catalog.md) defines gates and data recipes.
-[Implementation status](api-discovery.md) separates prepared transport tooling
-from the still-blocked application API fixtures and specs.
+[Implementation status](api-discovery.md) distinguishes implemented public
+contracts from the still-blocked controlled-data cases.
 
 Platform/layer: Playwright APIRequestContext, `@api`; no browser actions and no
 mocked backend responses. Every listed suite becomes exactly one suite tag.
@@ -14,9 +14,11 @@ do not add undocumented locale fields.
 For the eight controlled-data cases: behavior verification **proposed**, manual execution **not run
 (gates unresolved)**, automation suitability **candidate**, implementation
 **not implemented**, automation execution **not run (gates unresolved)**, evidence
-**none**. These inherited fields apply to those original cases only. The four
+**none**. These inherited fields apply to those original cases only. The eight
 public cases below have explicit observed/implemented overrides and a separately
 opted-in read-only runtime; see [discovery evidence](api-discovery.md).
+Four additional cases cover casing identity and normalization-input contracts;
+all four passed in the [latest run](api-read-only-increment-2026-11-04.md).
 
 Success JSON validation uses canonical strict shared schemas, status assertions
 separate from `expect(Schema.parse(body)).toBeTruthy();`, and JSON typed as
@@ -61,32 +63,78 @@ still verify client-side feedback, but backend rules belong here.
 
 ## Implemented public read-only cases
 
-Source: [authorized browser observations](api-discovery.md); related plan groups
-WEB-002/WEB-006 and API search/detail areas. Layer/suite/features:
-`@api`, `@smoke`, `@search` or `@jobs`. All four are **P0**, behavior **observed**,
-manual execution **not run**, automation **suitable for the limited public scope**,
-implementation **complete**, automation execution **not run (user deferred)**.
-Observations are evidence of contracts, not passing test evidence.
+Source: [authorized observations](api-discovery.md); related plan groups
+WEB-002/WEB-006 and API search/detail areas. All use layer `@api` and the
+feature `@search` or `@jobs`; suite and priority are listed per case.
 
-| Case ID               | Independent steps and expected outcome                                                                                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| API-PUBLIC-SUGGEST-01 | GET suggestions for observed `programator`; assert 200, strict JSON contract and `Programator` label                                                                                     |
-| API-PUBLIC-SUGGEST-02 | GET suggestions for observed `contabil`; assert 200, strict JSON contract and `Contabil` label                                                                                           |
-| API-PUBLIC-SUGGEST-03 | GET suggestions for observed `șofer`; assert 200, strict JSON contract and `Șofer` label                                                                                                 |
-| API-PUBLIC-VACANCY-01 | GET current public programmer-search HTML and select an observed VIP route; in a separate request step fetch its popup JSON, assert 200, strict contract and route/response ID agreement |
+Shared fields: behavior **observed for the modeled inputs**, manual execution
+**not run**, automation **suitable for this limited public scope**,
+implementation **complete**. The executed results below are from
+[2026-11-04](api-execution-2026-11-04.md). The whitespace response violates the
+modeled contract and remains an active failure.
+
+| Case ID               | Priority / suite | Independent action and expected outcome                                                                                             | Automation result                               |
+| --------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| API-PUBLIC-SUGGEST-01 | P0 / smoke       | GET `programator`; status 200, strict JSON and `Programator` label                                                                  | Passed                                          |
+| API-PUBLIC-SUGGEST-02 | P0 / smoke       | GET `contabil`; status 200, strict JSON and `Contabil` label                                                                        | Passed                                          |
+| API-PUBLIC-SUGGEST-03 | P0 / smoke       | GET `șofer`; status 200, strict JSON and `Șofer` label                                                                              | Passed                                          |
+| API-PUBLIC-SUGGEST-04 | P1 / regression  | GET empty string; status 200 and strict zero-suggestion response                                                                    | Passed                                          |
+| API-PUBLIC-SUGGEST-05 | P1 / regression  | GET `PROGRAMATOR`; strict JSON includes `Programator`                                                                               | Passed                                          |
+| API-PUBLIC-SUGGEST-06 | P1 / regression  | GET `ȘOFER`; strict JSON includes `Șofer`                                                                                           | Passed                                          |
+| API-PUBLIC-SUGGEST-07 | P1 / regression  | GET three spaces; strict contract and usable non-blank labels                                                                       | Failed; [API-CONTRACT-001](api-contract-001.md) |
+| API-PUBLIC-VACANCY-01 | P0 / smoke       | GET current public search HTML; select an observed VIP route; separate GET popup JSON with status, strict contract and ID agreement | Passed                                          |
+
+### Casing identity regression increment — 2026-11-04
+
+| Case ID               | Priority / suite | Independent action and expected outcome                                                                                                                                                             | Automation result            |
+| --------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| API-PUBLIC-SUGGEST-08 | P1 / regression  | GET the observed lowercase and uppercase programmer queries in separate steps; both responses satisfy the strict contract and contain exactly one expected label with the same positive taxonomy ID | Passed; latest read-only run |
+| API-PUBLIC-SUGGEST-09 | P1 / regression  | Independently repeat the identity check for the observed Romanian driver queries, preserving diacritics                                                                                             | Passed; latest read-only run |
+
+Source: plan §4.2 search contracts and targeted localization; existing observed
+query/label pairs in [discovery](api-discovery.md). Behavior verification:
+**query/label presence, cross-casing ID equality and label uniqueness observed
+for the selected inputs in the latest run**. Manual execution: **not run**. Automation suitability:
+**suitable for the limited public scope**. Implementation: **complete** in
+the same spec and typed case table. These expectations check consistent identity
+for the same exact taxonomy label, without assuming equal full result sets,
+ordering, accent removal, or whitespace normalization. Each test independently
+fetches its baseline; neither relies on another case or pins a live taxonomy ID.
+Preconditions, read-only isolation, teardown and live-data limits below also apply.
+Evidence: [implementation verification](api-implementation-2026-11-04.md).
+
+### Normalization-input contract increment — 2026-11-04
+
+| Case ID               | Priority / suite | Independent action and expected outcome                                                                                            | Automation result |
+| --------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| API-PUBLIC-SUGGEST-10 | P1 / regression  | GET `programator` with one ASCII space on each side; assert HTTP 200, JSON media type and the existing strict suggestions contract | Passed            |
+| API-PUBLIC-SUGGEST-11 | P1 / regression  | GET `sofer`; assert HTTP 200, JSON media type and the existing strict suggestions contract                                         | Passed            |
+
+Source: normalization-input observations in [discovery](api-discovery.md) and plan
+§4.2 search contracts. Behavior verification: **observed for these exact inputs
+in the latest run**. Manual execution: **not run**. Automation suitability:
+**suitable for this limited public contract scope**. Implementation: **complete**.
+No non-production environment is available; both cases remain public GET-only.
+Each independent request owns its fixture context and teardown. The existing
+schema permits empty results and validates every returned taxonomy entry; these
+tests do not require trimming, accent equivalence, equal result sets or a fixed
+normalization policy. No new endpoint/schema branch was invented or widened.
+Inputs and specs are linked below. Evidence:
+[latest execution](api-read-only-increment-2026-11-04.md).
 
 Preconditions: verified same-origin `API_BASE_URL`, separate
 `ALLOW_PUBLIC_READ_ONLY_API=true` opt-in and public service availability.
-Inputs: [typed observed cases](../../web/test-data/static/public-api-cases.ts),
-not disposable accounts or fixed live ad IDs. Each case owns isolated request
-contexts, disposed in fixture teardown; no backend records are changed.
+Inputs: [typed observed cases](../../web/test-data/static/public-api-cases.ts);
+no disposable account or fixed live vacancy ID is used. Each case owns isolated
+request contexts, disposed in fixture teardown; no backend records are changed.
 Implementation: [public-jobs.spec.ts](../../web/tests/api/public-jobs.spec.ts).
+Evidence: [execution record](api-execution-2026-11-04.md), with generated
+HTML/JUnit and failure trace under ignored `reports/web/`.
 
 Live limits: taxonomy labels may change; supported VIP listings may disappear or
-expire between selection/read. Fail and investigate those outcomes; never skip,
-retry silently or claim a controlled dataset. No title/employer persistence,
-full result matching, filters, empty/error or write semantics are established.
-These new IDs do not complete or replace the original cases below.
+expire between requests. Fail and investigate those outcomes; never skip or
+silently retry. Empty autocomplete input is distinct from zero-result vacancy
+search. These public IDs do not replace the controlled-data cases below.
 
 ## Controlled-data cases awaiting prerequisites
 

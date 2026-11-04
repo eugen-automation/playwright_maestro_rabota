@@ -1,0 +1,11 @@
+appId: ${APP_ID}
+name: 'AND-MOB-001-01 - Public home exposes Romanian search controls'
+tags:
+  - smoke
+  - navigation
+  - read-only
+  - android-only
+---
+- runFlow: ../../subflows/launch-app.yaml
+- assertVisible: 'Cuvânt-cheie: jobul căutat'
+- assertVisible: 'Caută job după rubrici'

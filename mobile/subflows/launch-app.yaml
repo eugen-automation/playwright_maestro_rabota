@@ -1,0 +1,15 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: false
+    # An empty map prevents Maestro's default grant-all permission behavior.
+    permissions: {}
+# Flutter exposes text only. Scope the app tab away from Android's Home button.
+- tapOn:
+    text: 'Acasă'
+    leftOf: 'Aplicări'
+# Home can retain its scroll position; restore the public search viewport.
+- scrollUntilVisible:
+    element: 'Caută job'
+    direction: UP
+- assertVisible: 'Caută job'

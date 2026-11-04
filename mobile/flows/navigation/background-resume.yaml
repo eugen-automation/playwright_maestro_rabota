@@ -1,0 +1,15 @@
+appId: ${APP_ID}
+name: 'AND-MOB-PUBLIC-RESUME-01 - Resuming preserves the profession results screen'
+tags: [regression, navigation, read-only, android-only]
+---
+- runFlow: ../../subflows/launch-app.yaml
+- runFlow: ../../subflows/search-programmer-jobs.yaml
+- pressKey: Home
+- launchApp:
+    stopApp: false
+    clearState: false
+    permissions: {}
+- assertVisible: '(?-i)^Programator$'
+- assertVisible: 'După dată'
+- back
+- assertVisible: 'Caută job'

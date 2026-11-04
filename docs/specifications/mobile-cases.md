@@ -12,9 +12,11 @@ Retain the case inventory and select platform cases by distinct risk/readiness.
 
 Each template below defines **two independent cases**, prefixed AND and IOS.
 Their descriptions can be shared, but build support, selectors, setup, execution
-and evidence must be verified separately. No installed package/bundle identifier
-or native selector has been verified. M is unresolved for both platforms; iOS
-also needs I. No mobile flow is currently implemented.
+and evidence must be verified separately. Android discovery and the public
+launch case are now verified for the selected installed build; an additional
+public keyword-picker case is recorded below. Controlled-data and write cases
+retain their own unmet gates. iOS identifiers/selectors and gate I remain
+unverified. See [native implementation/execution](mobile-implementation-2026-11-04.md).
 
 Inherited fields for every platform case: behavior verification **proposed**,
 automation suitability **candidate**, evidence **none**. The platform tables
@@ -35,6 +37,44 @@ when app state is cleared. Ordinary suite exclusions remain intact. Shared TS
 seed/cleanup runs outside Maestro; sensitive credentials must not appear in CLI
 -e arguments, YAML, reports or committed data.
 
+## Deferred iOS scope
+
+iOS implementation and execution are deferred by user instruction on 2026-11-04
+because no iOS device/simulator is available. Keep every IOS case ID as deferred
+backlog; none is an active implementation/release gate. Android work continues.
+
+## Additional public Android cases
+
+These are independently launched, read-only native integrations; they do not
+replace the controlled-data templates below. Source: plan MOB-002/003/004/012
+and authorized hierarchy/device observations on 2026-11-04. All four are
+implemented, have observed behavior on the selected build, and passed individually.
+Manual execution is **not run**; automation suitability is **suitable for the
+limited public scope**. Evidence: [continuation record](mobile-read-only-continuation-2026-11-04.md).
+
+| ID                       | Priority / suite / feature   | Independent steps and expected outcome                                                                                                                                                            |
+| ------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AND-MOB-PUBLIC-SEARCH-02 | P0 / smoke / search          | Launch independently, enter the observed profession, choose its case-sensitive suggestion; picker closes, the profession header and current result-card structure appear                          |
+| AND-MOB-PUBLIC-JOBS-01   | P0 / smoke / jobs            | Launch/search independently, capture a card within the visible results viewport, open that title/employer, assert its detail heading and captured identity, return to the same profession context |
+| AND-MOB-PUBLIC-FILTER-01 | P1 / regression / search     | Launch independently, open region, select the observed city, verify the form label, reopen and reset all regions; the picker closes and the reset form is available                               |
+| AND-MOB-PUBLIC-RESUME-01 | P1 / regression / navigation | Independently open profession results, background with Home, resume without stopping/clearing the app, verify the query/results screen, return Home                                               |
+
+Prerequisites: the verified installed build, selected connected/unlocked Android
+device, supported Romanian controls and separate runtime opt-in. Public results
+must contain an observed supported card; unavailable or changed live content
+fails visibly, without skipping/retrying. The shared profession helper owns its
+non-secret input; the city case owns its city/all-region inputs in YAML `env`.
+Dynamic vacancy titles/employers stay in Maestro memory and are regex-escaped by
+the reviewed runtime-compatible script, never pinned to a committed live advert.
+
+Cleanup: no backend setup or records are changed. Existing app/account/permission
+state is retained; the city case resets its local form. The external runner
+restores/verifies the prior wired display-awake setting even if execution fails.
+Limits: no guaranteed matching dataset, ID/persistence proof, sorting, exact
+counts, salary/filter intersection, scroll restoration or process-death recovery
+is asserted. Stable native IDs remain a testability request, including the region
+control; text/relational selectors are the documented interim contract.
+
 ## Cases
 
 ### MOB-001-01
@@ -53,10 +93,43 @@ Launch reaches the approved initial screen.
 - Cleanup: Close the app as appropriate; preserve device data. Do not clear state or keychain in ordinary cleanup.
 - Discovery question: Verify launch marker per platform and account state. This checks launch only; fresh installation/onboarding remains separate backlog.
 
-| Case ID        | Platform | Manual execution          | Automation implementation | Automation result         |
-| -------------- | -------- | ------------------------- | ------------------------- | ------------------------- |
-| AND-MOB-001-01 | Android  | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-MOB-001-01 | iOS      | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| Case ID        | Platform | Manual execution      | Automation implementation       | Automation result                             |
+| -------------- | -------- | --------------------- | ------------------------------- | --------------------------------------------- |
+| AND-MOB-001-01 | Android  | Not run manually      | Implemented - public Home scope | Passed 2026-11-04; selected build/device only |
+| IOS-MOB-001-01 | iOS      | Deferred - no devices | Deferred by user                | Not executed - deferred                       |
+
+Android override: behavior **observed**, automation **suitable for this limited
+public Home scope**, implementation **complete**, evidence
+[2026-11-04 device run](mobile-implementation-2026-11-04.md). The flow checks the
+Romanian Home/search controls without inspecting account identity, clearing
+storage or resetting authentication. It does not certify fresh-install,
+onboarding or logged-out startup. Native IDs are absent on these Flutter
+controls; observed text and a relational Home selector are interim selectors.
+
+### AND-MOB-PUBLIC-SEARCH-01
+
+Keyword picker opens and returns to the public Home screen.
+
+- Source: MOB-002 navigation/control wiring; this does not replace the controlled
+  matching case below. Android only, P0 / smoke / search.
+- Gates / preconditions: observed installed Android build and Romanian controls,
+  explicit read-only opt-in, selected connected/unlocked device and public Home
+  availability. No account credentials or controlled vacancy data are used.
+- Data: no business input; existing recent/popular suggestions are not asserted
+  or copied into committed evidence.
+- Steps: independently launch through the shared state-preserving helper; open
+  the keyword control; assert `Selectează postul`; hide its keyboard; navigate
+  back; assert the Home search button and keyword control.
+- Expected outcome: the observed picker opens and closes normally without an
+  unintended navigation destination. This proves native control/navigation
+  wiring, not keyword normalization, result membership or backend correctness.
+- Cleanup: leave the public Home screen; preserve existing storage, account
+  state and permissions. No backend setup or cleanup is necessary.
+- Behavior: **observed**; manual execution: **not run**; automation:
+  **suitable for the limited read-only scope**; implementation: **complete**;
+  automation result: **passed 2026-11-04** on the selected device/build.
+- Evidence: [implementation/execution](mobile-implementation-2026-11-04.md);
+  flow: [keyword-picker.yaml](../../mobile/flows/search/keyword-picker.yaml).
 
 ### MOB-002-01
 
@@ -77,7 +150,7 @@ Keyword search presents the expected controlled vacancies.
 | Case ID        | Platform | Manual execution          | Automation implementation | Automation result         |
 | -------------- | -------- | ------------------------- | ------------------------- | ------------------------- |
 | AND-MOB-002-01 | Android  | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-MOB-002-01 | iOS      | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| IOS-MOB-002-01 | iOS      | Deferred - no devices     | Deferred by user          | Not executed - deferred   |
 
 ### MOB-003-01
 
@@ -98,7 +171,7 @@ City and salary filters constrain the visible results.
 | Case ID        | Platform | Manual execution          | Automation implementation | Automation result         |
 | -------------- | -------- | ------------------------- | ------------------------- | ------------------------- |
 | AND-MOB-003-01 | Android  | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-MOB-003-01 | iOS      | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| IOS-MOB-003-01 | iOS      | Deferred - no devices     | Deferred by user          | Not executed - deferred   |
 
 ### MOB-004-01
 
@@ -119,7 +192,7 @@ Open a vacancy and return to the same search state.
 | Case ID        | Platform | Manual execution          | Automation implementation | Automation result         |
 | -------------- | -------- | ------------------------- | ------------------------- | ------------------------- |
 | AND-MOB-004-01 | Android  | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-MOB-004-01 | iOS      | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| IOS-MOB-004-01 | iOS      | Deferred - no devices     | Deferred by user          | Not executed - deferred   |
 
 ### MOB-005-01
 
@@ -140,7 +213,7 @@ Valid disposable candidate login reaches the signed-in screen.
 | Case ID        | Platform | Manual execution          | Automation implementation | Automation result         |
 | -------------- | -------- | ------------------------- | ------------------------- | ------------------------- |
 | AND-MOB-005-01 | Android  | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-MOB-005-01 | iOS      | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| IOS-MOB-005-01 | iOS      | Deferred - no devices     | Deferred by user          | Not executed - deferred   |
 
 ### MOB-006-01
 
@@ -162,7 +235,7 @@ Eligible candidate submits an owned application.
 | Case ID        | Platform | Manual execution          | Automation implementation | Automation result         |
 | -------------- | -------- | ------------------------- | ------------------------- | ------------------------- |
 | AND-MOB-006-01 | Android  | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-MOB-006-01 | iOS      | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| IOS-MOB-006-01 | iOS      | Deferred - no devices     | Deferred by user          | Not executed - deferred   |
 
 ### MOB-007-01
 
@@ -183,7 +256,7 @@ An owned saved job remains saved after reopening.
 | Case ID        | Platform | Manual execution          | Automation implementation | Automation result         |
 | -------------- | -------- | ------------------------- | ------------------------- | ------------------------- |
 | AND-MOB-007-01 | Android  | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-MOB-007-01 | iOS      | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| IOS-MOB-007-01 | iOS      | Deferred - no devices     | Deferred by user          | Not executed - deferred   |
 
 ### MOB-013-01
 
@@ -205,4 +278,4 @@ Offline search failure recovers when connectivity returns.
 | Case ID        | Platform | Manual execution          | Automation implementation | Automation result         |
 | -------------- | -------- | ------------------------- | ------------------------- | ------------------------- |
 | AND-MOB-013-01 | Android  | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
-| IOS-MOB-013-01 | iOS      | Not run; gates unresolved | Not implemented           | Not run; gates unresolved |
+| IOS-MOB-013-01 | iOS      | Deferred - no devices     | Deferred by user          | Not executed - deferred   |

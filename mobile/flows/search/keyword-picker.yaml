@@ -1,0 +1,15 @@
+appId: ${APP_ID}
+name: 'AND-MOB-PUBLIC-SEARCH-01 - Keyword picker returns to public home'
+tags:
+  - smoke
+  - search
+  - read-only
+  - android-only
+---
+- runFlow: ../../subflows/launch-app.yaml
+- tapOn: 'Cuvânt-cheie: jobul căutat'
+- assertVisible: 'Selectează postul'
+- hideKeyboard
+- back
+- assertVisible: 'Caută job'
+- assertVisible: 'Cuvânt-cheie: jobul căutat'

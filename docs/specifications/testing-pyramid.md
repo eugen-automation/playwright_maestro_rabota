@@ -23,13 +23,29 @@ no fixed count or percentage quota. Keep each test independent; the layer order
 does not make a test depend on a preceding API/UI test's state or result.
 
 The original catalog had 8 API, 26 UI, 1 web E2E, 16 mobile and 4 cross-platform
-instances. Four observed public API cases have since been implemented, bringing
-the inventory to 59; their execution is deferred. The original markup E2E retains
+instances. Eight observed public API cases have since been implemented, bringing
+the inventory to 63. Two subsequent casing-identity regressions bring it to 65;
+their first live verification has now passed for the selected pairs. Two
+normalization-input contract cases bring the catalog to 67 instances. The latest
+public run has **11 passed, 1 failed** across twelve cases; the whitespace
+discrepancy remains active. See the
+[latest implementation/execution record](api-read-only-increment-2026-11-04.md).
+The earlier 2026-11-04 API run has seven passes and one active
+whitespace contract failure; all 14 foundation checks passed. See the
+[execution record](api-execution-2026-11-04.md). The original markup E2E retains
 its prior result. Counts are not a target ratio or full feature coverage. Keep
 IDs/evidence, expand API design first, and select UI/E2E by distinct risk. See
 [API discovery](api-discovery.md) for the limited implemented GET-only scope.
 
 ## Feature ownership
+
+The later native continuation brings the retained catalog to 72 instances,
+including six implemented public Android flows. Ten iOS instances are explicitly
+deferred because no devices are available; they are excluded from active gates.
+The existing markup E2E now has a passing four-browser Windows matrix, which is
+additional execution coverage of one scenario, not new logical test cases. See
+[current evidence](mobile-read-only-continuation-2026-11-04.md) and the catalog for
+remaining data/build/authorization prerequisites. CI remains deferred.
 
 The following is proposed coverage ownership, not verified product behavior.
 Use documented requirements and authorized discovery before implementing any row.

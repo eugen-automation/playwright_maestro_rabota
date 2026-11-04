@@ -1,0 +1,25 @@
+appId: ${APP_ID}
+name: 'AND-MOB-PUBLIC-JOBS-01 - Selected vacancy identity survives detail navigation'
+tags: [smoke, jobs, read-only, android-only]
+---
+- runFlow: ../../subflows/launch-app.yaml
+- runFlow: ../../subflows/search-programmer-jobs.yaml
+# Choose the topmost card within the results viewport; no fixed live ID or sort order.
+- copyTextFrom:
+    text: '(?s).+\n.+\n.+\nActualizat:.*'
+    below: 'După dată'
+    above:
+      text: 'Acasă'
+      leftOf: 'Aplicări'
+    index: 0
+- runScript: ../../scripts/capture-public-vacancy.js
+- tapOn:
+    text: ${output.publicVacancyCard}
+- assertVisible: 'Post vacant'
+- assertVisible:
+    text: ${output.publicVacancyDetailTitle}
+- assertVisible:
+    text: ${output.publicVacancyEmployer}
+- back
+- assertVisible: '(?-i)^Programator$'
+- assertVisible: 'După dată'

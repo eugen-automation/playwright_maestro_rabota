@@ -25,7 +25,7 @@ Product unit/component tests belong below API tests in the wider pyramid; this
 repository does not contain application source. Its foundation tests validate
 automation utilities and configuration, not product business logic.
 
-The first API increment implements four public read-only cases for observed job
+The public API increment implements twelve read-only cases for observed job
 autocomplete and VIP vacancy JSON. Broader matching/filter/error/permission and
 write coverage still needs verified contracts and controlled data. The existing
 registration-markup E2E is a retained baseline. See the
@@ -47,6 +47,10 @@ Supported values:
 | `TEST_LOCALE`                | Required `ro-MD`                                                           |
 | `ALLOW_PRODUCTION_READ_ONLY` | `true` or `false`; defaults to `false`                                     |
 | `ALLOW_PUBLIC_READ_ONLY_API` | Separate GET-only API opt-in; defaults to `false`                          |
+| `ANDROID_APP_ID`             | Verified installed Android package; required only for Android execution    |
+| `ANDROID_DEVICE_ID`          | Explicit user-selected, connected, unlocked Android device                 |
+| `ANDROID_APP_VERSION`        | Pinned installed app version name; the runner rejects a mismatch           |
+| `ALLOW_ANDROID_READ_ONLY`    | Independent reviewed read-only native-flow opt-in; defaults to `false`     |
 | `CI`                         | Optional `true`, `false`, or empty; normally supplied by CI                |
 
 `shared/config/load-env.ts` reads the root file once, merges shell/CI variables
@@ -101,15 +105,26 @@ $env:ALLOW_PUBLIC_READ_ONLY_API = 'true'
 npm.cmd run test:web:api
 ```
 
-Three cases validate autocomplete contracts and observed Romanian taxonomy labels;
-one fetches current search HTML, selects an observed VIP vacancy route, and checks
-its strict JSON contract/identity. No browser is needed. This is public live-data
-coverage: taxonomy changes or missing/expired results fail visibly. It does not
-prove controlled search matching, filters, empty results, permissions or writes.
+Seven cases cover observed autocomplete taxonomy labels, empty input, uppercase
+Latin/Romanian inputs and whitespace label validity. One fetches current search
+HTML, selects an observed VIP vacancy route, and checks its strict JSON identity.
+The 2026-11-04 run finished with **7 passed, 1 failed**: whitespace produces a blank
+label that violates the existing contract. See [API-CONTRACT-001](docs/specifications/api-contract-001.md)
+and the [execution record](docs/specifications/api-execution-2026-11-04.md).
+Two additional regressions compare the expected taxonomy label's ID across
+lowercase/uppercase Latin and Romanian queries; both have now passed. Two more
+cover the existing JSON contract for padded and accentless inputs without
+asserting normalization behavior. The latest twelve-case run finished with
+**11 passed, 1 failed**, reproducing the same whitespace discrepancy. See the
+[latest implementation/execution record](docs/specifications/api-read-only-increment-2026-11-04.md).
+
+No browser is needed. This public live-data coverage does not prove controlled
+job-search matching, filters, zero-result job searches, permissions or writes.
 See [API discovery](docs/specifications/api-discovery.md) for the observed scope.
 
 The API flag does not enable browser E2E, and the browser flag does not enable API.
-UI and mobile remain disabled. No live API CI job or schedule was added.
+UI remains disabled. Android uses its own separately guarded runner below;
+iOS implementation is deferred by user instruction because no device/simulator is available. No live API CI job or schedule was added.
 
 ## Public read-only registration smoke
 
@@ -124,15 +139,27 @@ The smoke reads only the exact Romanian registration document with JavaScript
 disabled. Its fixture blocks all other requests, form submissions, assets, and
 WebSockets. It checks server-rendered controls without submitting anything.
 This is limited public E2E coverage, not isolated frontend behavior, visual
-verification, or successful registration. Chromium is the configured engine.
+verification, or successful registration. Chromium is the default engine.
+
+For the Windows compatibility matrix, install Playwright's Firefox with
+`npx.cmd playwright install firefox`, keep Chrome/Edge installed, and run
+`npm.cmd run test:web:e2e:compat` with the same read-only opt-in. The existing
+markup scenario passed in Chromium, Chrome, Edge and Firefox. This checks the
+limited document contract, not interactive/visual behavior; Safari needs macOS.
+Browser versions are included in result annotations/JUnit properties.
+
+`test:web:smoke` explicitly selects the public API and Chromium projects and
+requires both independent read-only opt-ins. Optional compatibility projects
+use the separate command above; unready authentication projects are not added
+to the default smoke selection.
 
 Reports: `reports/web/html/index.html`, `reports/web/junit.xml`, and failure
 artifacts under `reports/web/artifacts/`. Tests have no retries.
 
 `test:web:ui` has no application tests and remains disabled until isolation is
-implemented. The API layer has four authored cases, **not executed** after
-implementation at the user's request. The observed public calls during discovery
-are evidence of contracts, not a passing test run. Missing coverage must not be
+implemented. The latest twelve-case API run has **11 passed, 1 failed** on
+2026-11-04, as recorded above.
+The whitespace regression stays active; missing or failing coverage must not be
 interpreted as passing tests. Specs import `test` and `expect` from
 `web/fixtures/pom/test-options.ts` and require one matching layer tag and either
 `@smoke` or `@regression`.
@@ -145,12 +172,50 @@ the test plan to initial Web, API, Android/iOS, and synchronization cases. It
 tracks prerequisites and manual/automation statuses separately; proposed cases
 are not implemented coverage.
 
+## Android Maestro
+
+Maestro **2.11.0** is pinned by the runner. Set the verified Android package,
+device and installed version in the ignored `.env` (placeholder names above).
+Keep the selected phone unlocked and in Romanian; regional variants such as
+`ro-RO` are accepted, and the actual device locale is recorded separately from
+the shared `ro-MD` browser locale. The runner wakes the display but fails if the
+keyguard is active; it does not enter a PIN or change screen-lock settings.
+
+```powershell
+npm.cmd run check:mobile
+$env:ALLOW_ANDROID_READ_ONLY = 'true'
+npm.cmd run test:mobile:android -- --suite smoke
+```
+
+To run one exact flow, use `--flow mobile/flows/navigation/launch.yaml` instead
+of `--suite smoke`. `check:mobile` validates YAML, tags, subflow references and
+safety constraints; it is not device execution. The test runner also checks
+installed Maestro/app versions, device connectivity and the reviewed flow
+allowlist, then runs Maestro syntax validation and the selected flow(s).
+
+The six implemented Android cases check Home controls, keyword-picker navigation,
+profession results, selected vacancy title/employer and return navigation,
+city selection/reset, and background/resume of the results screen.
+They preserve app storage, account state and permission
+settings; no authentication or backend writes are performed. Protected tag
+exclusions cannot be disabled through this runner. State-reset/destructive
+runners are not implemented; iOS implementation is deferred because no devices
+are available. Credentials are not forwarded to
+Maestro; child processes receive only host-tooling variables and non-secret IDs.
+
+Reports are isolated by run under `reports/mobile/android/<run-id>/`: `run.json`
+records source/build/device/locale, `result.json` records the outcome, and
+`junit.xml`, `artifacts/` and `debug/` retain Maestro evidence. No APK or device
+evidence is committed. During execution the runner temporarily enables stay-awake
+for wired power (AC or USB), then restores and verifies the captured setting,
+including after failures. It does not change a PIN or bypass the keyguard.
+Only the reviewed vacancy-title capture script is allowed; arbitrary scripts
+remain rejected. See [latest native evidence](docs/specifications/mobile-read-only-continuation-2026-11-04.md).
+
 ## CI
 
-`quality.yml` runs local quality and policy checks on pushes and pull requests.
-`web.yml` offers a separately opted-in manual public read-only smoke run and
-uploads web results. Set GitHub repository variables `WEB_BASE_URL` and
-`TEST_LOCALE` before using that workflow; missing values fail validation.
+CI implementation is deferred by user instruction. Workflow files remain
+inactive; continue local quality checks and explicitly opted-in read-only runs.
 
 Production requests do not run automatically on a PR. API jobs, followed by
 focused mocked UI PR smoke and selected mobile jobs, await their prerequisites;
@@ -166,13 +231,15 @@ been executed on GitHub.
 - `shared/data/`: typed factories and curated shared fixtures.
 - `shared/api/`: GET-only transport, public jobs client and strict observed schemas.
 - `web/tests/ui/`: future frontend tests with verified file mocks and isolation.
-- `web/tests/api/`: four authored public read-only jobs cases; execution deferred.
+- `web/tests/api/`: twelve public read-only jobs cases; eleven pass, one tracked contract failure.
 - `web/tests/journeys/`: real integration; current checks remain public/read-only.
 - `web/fixtures/pom/`: canonical `test-options.ts` entry and network policy.
 - `mobile/flows/`: top-level Maestro tests; `mobile/subflows/`: reusable helpers.
-- `scripts/`: future runners and controlled setup/cleanup tooling.
+- `scripts/`: shared-config Maestro runner; future controlled setup/cleanup tooling.
 - `reports/web/`, `reports/mobile/`, `web/.auth/`: ignored generated data.
 
-Maestro configuration preserves protected tag exclusions. Flows and application
-identifiers will be added only after device inspection. Mobile execution remains
-unavailable; no mobile tests were executed.
+Android's six public read-only flows passed as four smoke and two regression
+cases on the selected
+verified device. Controlled-data mobile cases retain their prerequisites; iOS
+cases are explicitly deferred. These checks do not prove controlled result
+membership, persistence or writes.
