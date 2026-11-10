@@ -108,7 +108,7 @@ test(
   `${JOB_SUGGESTION_EDGE_CASES.whitespace.id}: whitespace autocomplete does not return blank labels`,
   { tag: ['@regression', '@api', '@search'] },
   async ({ publicJobsApi }) => {
-    // API-CONTRACT-001 is tracked in docs/specifications/api-contract-001.md.
+    // DEC-API-001 is tracked in docs/DECISIONS.md.
     // Keep this assertion active: the observed blank label violates the contract.
     const response = await publicJobsApi.suggest(
       JOB_SUGGESTION_EDGE_CASES.whitespace.query,

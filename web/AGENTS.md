@@ -1,22 +1,25 @@
 # Playwright rules
 
 Applies to `web/`; [root rules](../AGENTS.md) take priority. Shared API contracts,
-clients and factories remain in `shared/`. API implementation has first priority.
+clients and factories remain in `shared/`. Current priorities belong in the test
+plan rather than this permanent framework policy.
 
 ## Layers and fixtures
 
-| Directory / layer tag | Responsibility | Backend traffic |
-| --- | --- | --- |
-| `tests/api/` / `@api` | Backend rules, contracts, validation, permissions and persistence | Real authorized requests only; no browser-driven setup/actions |
-| `tests/ui/` / `@ui` | Real frontend rendering and interaction | None; verified file-backed responses only |
-| `tests/journeys/` / `@e2e` | Selected integrated outcomes | Approved real frontend/backend; no application backend mocks |
+| Directory / layer tag      | Responsibility                                                    | Backend traffic                                                |
+| -------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------- |
+| `tests/api/` / `@api`      | Backend rules, contracts, validation, permissions and persistence | Real authorized requests only; no browser-driven setup/actions |
+| `tests/ui/` / `@ui`        | Real frontend rendering and interaction                           | None; verified file-backed responses only                      |
+| `tests/journeys/` / `@e2e` | Selected integrated outcomes                                      | Approved real frontend/backend; no application backend mocks   |
 
 - Every spec imports `test` and `expect` only from `fixtures/pom/test-options.ts`
   (correct relative path or configured alias). Import only needed symbols. Only
   implementation/config/POM files may import Playwright APIs/types directly.
-- Construct POMs and typed API clients in fixtures composed through that single
-  entry. Receive them as callback arguments; never `new PageObject(page)` in specs.
-  API tests use isolated request contexts without browser/auth UI setup.
+- Construct POMs in fixtures composed through that single entry and receive them
+  as callback arguments; never `new PageObject(page)` in specs. Expose shared or
+  lifecycle-owned typed API clients through fixtures; a focused test-local helper
+  may remain local when fixture lifecycle or reuse adds no value. API tests use
+  isolated request contexts without browser/auth UI setup.
 - Every web test has exactly one matching layer tag and exactly one suite tag,
   `@smoke` or `@regression`, plus useful feature tags. Inherited describe tags are
   allowed when all children share them; avoid conflicting inherited suite tags.
@@ -45,10 +48,11 @@ clients and factories remain in `shared/`. API implementation has first priority
   Use `z.strictObject()` for modeled objects including nested contracts; explicitly
   document dynamic-key `z.record` objects or projections of variable metadata.
   Derive types with `z.infer`; never widen a contract just to make a test pass.
-- Assert successful status separately, then use the required convention exactly:
-  `expect(SchemaName.parse(body)).toBeTruthy();`. Also assert the business outcome.
-  Use dedicated error/empty schemas where appropriate. Do not parse empty 204,
-  irrelevant background traffic or non-JSON streams as JSON contracts.
+- Assert successful status separately, parse the body with the applicable schema,
+  and make a meaningful business assertion against the parsed result. A successful
+  `parse()` does not need a ceremonial truthiness matcher. Use dedicated error/empty
+  schemas where appropriate. Do not parse empty 204, irrelevant background traffic,
+  or non-JSON streams as JSON contracts.
 - If a test explicitly makes two or more API requests, **each** gets a descriptive
   `test.step()` containing status, applicable schema and business assertions.
   Validate fixture setup/cleanup too. Incidental browser traffic does not count.

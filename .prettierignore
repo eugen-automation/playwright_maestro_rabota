@@ -2,6 +2,4 @@ node_modules/
 reports/
 package-lock.json
 web/.auth/
-AGENTS.md
-docs/TEST_PLAN.md
 .env*

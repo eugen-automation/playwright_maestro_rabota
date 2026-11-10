@@ -6,8 +6,8 @@ and critical integrations at the top of the pyramid; shared backend rules stay A
 ## Configuration and lifecycle
 
 - Verify actual Android package and iOS bundle IDs from installed builds before
-  configuration. `md.simpals.app999` is only a candidate Android ID, never a
-  universal ID. iOS simulator work requires a compatible macOS setup/build.
+  configuration. Treat supplied identifiers as unverified candidates, never
+  universal IDs. iOS simulator work requires a compatible macOS setup/build.
 - The shared TypeScript runner consumes shared validated config, selects the
   platform ID and injects `APP_ID` into Maestro (`-e APP_ID=...` or supported
   equivalent). Every flow/subflow header uses `appId: ${APP_ID}` and `---`.
